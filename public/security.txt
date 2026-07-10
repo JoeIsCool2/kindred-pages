@@ -1,0 +1,3 @@
+Contact: mailto:support@kindred.page
+Policy: https://kindred.page/privacy.html
+Preferred-Languages: en

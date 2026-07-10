@@ -1,0 +1,10 @@
+{
+  "name": "Kindred Pages",
+  "short_name": "Kindred",
+  "description": "Memorial websites families can finish gently.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbfaf6",
+  "theme_color": "#2f5545",
+  "icons": []
+}
