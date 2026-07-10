@@ -564,7 +564,12 @@ const checks = [
   ['docs/schema.sql', 'create table activity_log'],
   ['docs/schema.sql', 'activity_log_memorial_id_idx'],
   ['vercel.json', '"outputDirectory": "dist"'],
-  ['vercel.json', 'Content-Security-Policy']
+  ['vercel.json', 'Content-Security-Policy'],
+  ['vercel.json', "media-src 'self' data: blob: https:"],
+  ['vercel.json', "connect-src 'self' https:"],
+  ['vercel.json', "form-action 'self' https:"],
+  ['README.md', 'Vercel security headers'],
+  ['docs/production-checklist.md', 'production CSP allows approved HTTPS API']
 ];
 
 const requiredFiles = [

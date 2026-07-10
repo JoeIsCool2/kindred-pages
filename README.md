@@ -112,6 +112,8 @@ Public trust pages are served from `/privacy.html`, `/terms.html`, and `/securit
 
 This app can deploy to any static host that supports single-page apps, including Vercel, Netlify, Cloudflare Pages, or S3/CloudFront.
 
+Vercel security headers allow approved HTTPS APIs, media, storage, and checkout destinations while keeping scripts self-hosted and blocking third-party framing.
+
 Required production services for a real launch:
 
 - Authentication for family admins and funeral-home partners

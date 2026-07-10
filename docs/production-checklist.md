@@ -105,5 +105,6 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Run `npm run verify`.
 - Run `npm run verify:config` with real `.env.local` production values.
 - Run dependency audit when registry access is available.
+- Confirm production CSP allows approved HTTPS API, image, media, checkout, and storage endpoints while blocking framing and unsafe scripts.
 - Deploy `dist/` through the selected host.
 - Smoke test `/`, `/privacy.html`, `/terms.html`, `/security.txt`, `/robots.txt`, and `/sitemap.xml`.
