@@ -9,6 +9,7 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 - Guided memorial page builder
 - Multi-page product experience with focused Home, Builder, Preview, Pricing, Partners, and Trust pages
 - Browser-routed pages for `/builder`, `/preview`, `/pricing`, `/partners`, and `/trust`
+- Route-specific page titles, descriptions, canonical URLs, and social preview metadata
 - Guided gathering-type presets for celebration-of-life, funeral, graveside, online remembrance, and private archive pages
 - Direct builder-section links for Person, Story, Service, Guest Care, Memories, Family Desk, Partner Desk, Announcements, Keepsakes, and Settings
 - Section readiness markers in the builder navigation so families can see what needs attention

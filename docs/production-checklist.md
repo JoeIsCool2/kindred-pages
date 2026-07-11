@@ -50,6 +50,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm Sensitive Details Review requires reviewer, timestamp, checklist, notes, and approval-packet inclusion before publishing.
 - Confirm checkout summary and packet include selected plan, price, billing mode, included items, family contact, slug, privacy mode, and return URL.
 - Confirm share preview title, description, image, canonical URL, and robots settings match the published page.
+- Confirm Home, Builder, Preview, Pricing, Partners, and Trust routes each set a clear page title, description, canonical URL, Open Graph, and Twitter preview metadata.
 - Confirm family helper invite notes, roles, email addresses, editable statuses, and copied-invite state are saved and sent correctly.
 - Confirm family ownership handoff packet includes owner, helpers, archive, approvals, privacy, partner access, and remaining next actions.
 - Confirm the family activity history records memory approvals, kept-private moderation actions, exports, helper invite copies, checkout, domain, publish, and invite actions.

@@ -516,6 +516,64 @@ function routeFromPath(pathname) {
   return '/';
 }
 
+function getRouteMetadata(route, site, productionUrl) {
+  const meta = {
+    '/': {
+      title: 'Kindred Pages | Memorial websites families can finish gently',
+      description: 'Create a beautiful memorial page, collect memories, share service details, and preserve a private family archive.'
+    },
+    '/builder': {
+      title: 'Build a Memorial Page | Kindred Pages',
+      description: 'A focused memorial builder for story, service details, guest care, memories, keepsakes, privacy review, and launch approval.'
+    },
+    '/preview': {
+      title: `${site.name || 'Memorial'} Preview | Kindred Pages`,
+      description: `Preview the guest-facing memorial page for ${site.name || 'a loved one'} with RSVP, livestream, support, and memory sharing.`
+    },
+    '/pricing': {
+      title: 'Pricing | Kindred Pages',
+      description: 'Simple family memorial plans and funeral-home partner pricing for celebration-of-life pages, keepsakes, and archives.'
+    },
+    '/partners': {
+      title: 'Funeral Home Partners | Kindred Pages',
+      description: 'A co-branded memorial website workflow for funeral homes that need polished family drafts, service exports, and clean handoff.'
+    },
+    '/trust': {
+      title: 'Trust, Privacy, and Research | Kindred Pages',
+      description: 'How Kindred Pages handles private memorials, family moderation, sensitive details, archive exports, and research-backed guest care.'
+    }
+  }[route] || {};
+
+  const path = route === '/' ? '/' : route;
+  const base = productionUrl.replace(/\/$/, '');
+  return {
+    title: meta.title || 'Kindred Pages',
+    description: meta.description || 'Memorial websites families can finish gently.',
+    url: `${base}${path}`,
+    image: `${base}/assets/kindred-hero.jpg`
+  };
+}
+
+function upsertMeta(attribute, key, content) {
+  let element = document.head.querySelector(`meta[${attribute}="${key}"]`);
+  if (!element) {
+    element = document.createElement('meta');
+    element.setAttribute(attribute, key);
+    document.head.appendChild(element);
+  }
+  element.setAttribute('content', content);
+}
+
+function upsertCanonical(href) {
+  let element = document.head.querySelector('link[rel="canonical"]');
+  if (!element) {
+    element = document.createElement('link');
+    element.setAttribute('rel', 'canonical');
+    document.head.appendChild(element);
+  }
+  element.setAttribute('href', href);
+}
+
 function getLaunchChecks(site) {
   return [
     { label: 'Name and life dates added', done: Boolean(site.name && site.lifespan) },
@@ -981,7 +1039,7 @@ function App() {
     addActivity('Gathering setup applied', `${preset.label} guidance updated service, privacy, guest-care, and schedule fields.`);
     setToast(`${preset.label} setup applied`);
   };
-  const productionUrl = import.meta.env.VITE_APP_URL || 'https://kindred.page';
+  const productionUrl = import.meta.env.VITE_APP_URL || window.location.origin || 'https://kindred.page';
   const checkoutUrl = import.meta.env.VITE_STRIPE_CHECKOUT_URL || '';
   const publishEndpoint = import.meta.env.VITE_PUBLISH_ENDPOINT || '';
   const integrationChecks = useMemo(() => ([
@@ -992,6 +1050,20 @@ function App() {
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
   ]), [checkoutUrl, publishEndpoint, productionUrl]);
+
+  useEffect(() => {
+    const metadata = getRouteMetadata(route, site, productionUrl);
+    document.title = metadata.title;
+    upsertMeta('name', 'description', metadata.description);
+    upsertMeta('property', 'og:title', metadata.title);
+    upsertMeta('property', 'og:description', metadata.description);
+    upsertMeta('property', 'og:url', metadata.url);
+    upsertMeta('property', 'og:image', metadata.image);
+    upsertMeta('name', 'twitter:title', metadata.title);
+    upsertMeta('name', 'twitter:description', metadata.description);
+    upsertMeta('name', 'twitter:image', metadata.image);
+    upsertCanonical(metadata.url);
+  }, [route, site.name, productionUrl]);
 
   const addMemory = () => {
     setSite((current) => ({
