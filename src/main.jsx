@@ -2418,38 +2418,74 @@ function PartnerMarketingPage({ site, onStart, onPricing }) {
     ['Handoff', site.partner.handoffStatus],
     ['Billing', site.partner.billingMode]
   ];
+  const workflow = [
+    ['Intake', 'Start a polished family draft with service details, gathering type, privacy defaults, and obituary copy already organized.'],
+    ['Coordinate', 'Track RSVPs, guest needs, livestream backup, readings, support links, and open service-day tasks in one place.'],
+    ['Handoff', 'Give the family ownership notes, archive status, helper access, privacy choices, and next actions without loose spreadsheets.']
+  ];
+  const outcomes = [
+    ['Less repeated coordination', 'Families and guests can find parking, access, livestream, reception, RSVP, and support details without calling the office.'],
+    ['A sellable digital add-on', 'The partner plan supports recurring family drafts, co-branding, package status, and simple handoff around existing service work.'],
+    ['Respectful boundaries', 'Moderation, family ownership, noindex defaults, and scoped co-admin access keep the funeral home helpful without taking over.']
+  ];
 
   return (
     <section id="page-content" className="page-section partner-page">
-      <div className="page-head">
-        <p className="eyebrow"><HeartHandshake size={16} /> Funeral-home partners</p>
-        <h1>A digital memorial add-on families can actually finish.</h1>
-        <p>Partner teams can prepare a polished draft, co-brand the handoff, help with service logistics, and leave final ownership with the family.</p>
-        <div className="hero-actions">
-          <button className="primary" onClick={onStart}>Open Partner Desk <ChevronRight size={18} /></button>
-          <button className="secondary" onClick={onPricing}><CreditCard size={18} /> See plans</button>
+      <div className="partner-landing">
+        <div className="page-head">
+          <p className="eyebrow"><HeartHandshake size={16} /> Funeral-home partners</p>
+          <h1>A digital memorial add-on families can actually finish.</h1>
+          <p>Partner teams can prepare a polished draft, co-brand the handoff, help with service logistics, and leave final ownership with the family.</p>
+          <div className="hero-actions">
+            <button className="primary" onClick={onStart}>Open Partner Desk <ChevronRight size={18} /></button>
+            <button className="secondary" onClick={onPricing}><CreditCard size={18} /> See plans</button>
+          </div>
+        </div>
+        <div className="partner-page-grid">
+          <article>
+            <h2>{site.partner.organization}</h2>
+            <p>{site.partner.brandLine}</p>
+            <div className="partner-mark-large">{site.partner.logoInitials}</div>
+          </article>
+          <div className="workflow-grid compact-cards">
+            {partnerStats.map(([label, value]) => (
+              <article key={label}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="partner-page-grid">
-        <article>
-          <h2>{site.partner.organization}</h2>
-          <p>{site.partner.brandLine}</p>
-          <div className="partner-mark-large">{site.partner.logoInitials}</div>
-        </article>
-        <div className="workflow-grid compact-cards">
-          {partnerStats.map(([label, value]) => (
-            <article key={label}>
-              <span>{label}</span>
-              <strong>{value}</strong>
+      <section className="partner-workflow">
+        <div className="page-head compact">
+          <p className="eyebrow"><Rocket size={16} /> Partner workflow</p>
+          <h2>Built around the handoff families already expect from a care team.</h2>
+        </div>
+        <div className="partner-flow">
+          {workflow.map(([title, text], index) => (
+            <article key={title}>
+              <span>{index + 1}</span>
+              <h3>{title}</h3>
+              <p>{text}</p>
             </article>
           ))}
         </div>
-      </div>
+      </section>
       <div className="workflow-grid">
         <article><Users size={22} /><h3>Scoped collaboration</h3><p>Funeral homes can help coordinate pages without owning the family archive or private memories.</p></article>
         <article><Printer size={22} /><h3>Service-day exports</h3><p>Programs, QR cards, day-of packets, guest guides, and coordinator briefs are ready for real gatherings.</p></article>
         <article><Archive size={22} /><h3>Clean handoff</h3><p>Families receive ownership notes, archive status, helper roles, privacy choices, and the next actions in one packet.</p></article>
       </div>
+      <section className="partner-outcomes">
+        {outcomes.map(([title, text]) => (
+          <article key={title}>
+            <Check size={18} />
+            <strong>{title}</strong>
+            <p>{text}</p>
+          </article>
+        ))}
+      </section>
     </section>
   );
 }
