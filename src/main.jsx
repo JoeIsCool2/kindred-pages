@@ -2300,6 +2300,7 @@ function App() {
         <Capability icon={QrCode} title="Service-ready" text="QR cards, printable programs, livestream, RSVP, and donation links." />
         <Capability icon={Archive} title="Family archive" text="Downloadable keepsake bundle and long-term preservation controls." />
       </section>
+      <HomeAudienceMap onStart={() => openStep('person')} onPreview={() => navigate('/preview')} onPartners={() => navigate('/partners')} onTrust={() => navigate('/trust')} />
       <HomeWorkflow onStart={() => openStep('person')} onPreview={() => navigate('/preview')} onTrust={() => navigate('/trust')} />
         </>
       )}
@@ -2399,6 +2400,34 @@ function HomeWorkflow({ onStart, onPreview, onTrust }) {
       </div>
       <div className="workflow-grid">
         {pages.map(({ icon: Icon, title, text, action, onClick }) => (
+          <article key={title}>
+            <Icon size={22} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+            <button className="secondary" onClick={onClick}>{action} <ChevronRight size={16} /></button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function HomeAudienceMap({ onStart, onPreview, onPartners, onTrust }) {
+  const audiences = [
+    { icon: FileHeart, title: 'Family admin', text: 'Start with a guided draft, choose the gathering type, review privacy, and publish when the page feels true.', action: 'Build the page', onClick: onStart },
+    { icon: Users, title: 'Guests', text: 'Find service details, RSVP, watch online, offer support, and share memories without calling the family for basics.', action: 'See guest view', onClick: onPreview },
+    { icon: HeartHandshake, title: 'Funeral home', text: 'Prepare co-branded drafts, coordinate service-day exports, and hand ownership back to the family cleanly.', action: 'Partner page', onClick: onPartners },
+    { icon: Archive, title: 'Family archive', text: 'Preserve approved memories, photos, guest lists, programs, QR cards, aftercare notes, and closure records.', action: 'Trust controls', onClick: onTrust }
+  ];
+
+  return (
+    <section className="page-section home-audience">
+      <div className="page-head compact">
+        <p className="eyebrow"><Sparkles size={16} /> Built for the whole memorial loop</p>
+        <h2>Not a generic website builder. A focused path from first draft to family archive.</h2>
+      </div>
+      <div className="audience-grid">
+        {audiences.map(({ icon: Icon, title, text, action, onClick }) => (
           <article key={title}>
             <Icon size={22} />
             <h3>{title}</h3>
