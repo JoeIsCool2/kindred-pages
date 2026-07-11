@@ -2491,11 +2491,18 @@ function PartnerMarketingPage({ site, onStart, onPricing }) {
 }
 
 function TrustResearchPage({ onStart }) {
+  const safeguards = [
+    ['Private by default', 'Invite-only, passcode, hidden-search, and noindex options help families share with the right circle first.'],
+    ['Family moderation', 'Guest memories, photos, and voice notes wait for family review before appearing publicly.'],
+    ['Sensitive review', 'Cause-of-death wording, protected photos, ritual language, and family-only notes get checked before launch.'],
+    ['Archive control', 'Families can export the page, guest list, moderation records, support needs, and keepsakes before closure.']
+  ];
   const principles = [
-    ['Continuing bonds', 'Memory collection, archives, and later anniversary prompts help families keep a meaningful connection through stories and rituals.'],
-    ['Dual-process coping', 'The app separates story work from practical tasks because bereaved families often move between emotional and logistical needs.'],
-    ['Social support buffering', 'Guest care, RSVP, support needs, and clear access details make it easier for people to show up helpfully.'],
-    ['Family control', 'Moderation, privacy review, sensitive-details review, and noindex defaults reduce avoidable exposure in a vulnerable moment.']
+    ['Continuing bonds', 'Klass, Silverman, and Nickman', 'Memory collection, archives, and anniversary prompts help families keep connection through stories and rituals.'],
+    ['Dual-process coping', 'Stroebe and Schut', 'The builder separates story work from practical tasks because families move between emotional and logistical needs.'],
+    ['Social support buffering', 'Cohen and Wills', 'Guest care, RSVP, support needs, and clear access details make it easier for people to show up helpfully.'],
+    ['Bereavement biography', 'Walter', 'Life chapters, programs, and memory books help preserve a fuller biography rather than only service logistics.'],
+    ['Online memorial care', 'Bell, Bailey, and Kennedy', 'Moderation and family control keep the memorial from becoming an uncontrolled public social feed.']
   ];
 
   return (
@@ -2505,11 +2512,21 @@ function TrustResearchPage({ onStart }) {
         <h2>The product is niche on purpose: memorial pages need different rules than generic websites.</h2>
         <p>Kindred Pages is organized around bereavement, family coordination, privacy, and practical guest care rather than templates and marketing sections.</p>
       </div>
+      <div className="safeguard-grid">
+        {safeguards.map(([title, text]) => (
+          <article key={title}>
+            <Shield size={18} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
       <div className="research-grid">
-        {principles.map(([title, text]) => (
+        {principles.map(([title, source, text]) => (
           <article key={title}>
             <Check size={18} />
             <h3>{title}</h3>
+            <span>{source}</span>
             <p>{text}</p>
           </article>
         ))}
@@ -4558,7 +4575,7 @@ function TrustCenter() {
   ];
 
   return (
-    <section className="trust-center">
+    <section id="page-content" className="trust-center">
       <div>
         <p className="eyebrow"><Shield size={16} /> Trust center</p>
         <h2>Made for a sensitive moment, with controls families can understand.</h2>

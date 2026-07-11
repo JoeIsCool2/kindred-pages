@@ -10,6 +10,7 @@ Kindred Pages is designed around bereavement, family coordination, and memorial 
 - Guest Care exists because social support is one of the best-supported buffers around stressful life events. Clear access, parking, schedule, contacts, and reception details reduce repeated coordination burden and make it easier for guests to show up helpfully.
 - Moderated guest memories avoid turning a sensitive memorial into a public social feed. The family keeps control over what appears publicly while still receiving support and stories.
 - Sensitive-details review reduces avoidable harm at the moment of publication by prompting families to deliberately handle cause-of-death wording, protected photos, support links, ritual language, and private instructions before guests see the page.
+- The Trust page translates research into family-readable safeguards: private defaults, moderation, sensitive review, archive control, and clear ownership boundaries.
 - QR cards, guest guides, and printable programs bridge the in-person gathering with the digital archive. This matches how memorial rituals often move between public ceremony, private family memory, and later revisiting.
 - Privacy defaults, archive export, and co-admin boundaries are product requirements because memorial pages contain sensitive family data, photos, service locations, and private grief messages.
 

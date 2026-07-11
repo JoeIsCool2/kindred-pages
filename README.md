@@ -11,6 +11,7 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 - Browser-routed pages for `/builder`, `/preview`, `/pricing`, `/partners`, and `/trust`
 - Pricing page with plan-fit guidance, family outcomes, partner value, and buying questions
 - Partner page with intake-to-handoff workflow, operational outcomes, and scoped family ownership messaging
+- Trust page with family safeguards and peer-reviewed evidence mapped to product choices
 - Route-specific page titles, descriptions, canonical URLs, and social preview metadata
 - Static post-build route shells so crawlers and social previews receive page-specific metadata before JavaScript loads
 - Guided gathering-type presets for celebration-of-life, funeral, graveside, online remembrance, and private archive pages
