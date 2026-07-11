@@ -4,7 +4,7 @@
   "description": "A launch-ready memorial and celebration-of-life website builder for families and care teams.",
   "scripts": {
     "start": "vite --host 127.0.0.1",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender-routes.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "verify": "node scripts/verify-launch.mjs",
     "verify:config": "node scripts/verify-config.mjs"
