@@ -3627,11 +3627,79 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   padding: 20px clamp(16px, 5vw, 70px) 80px;
 }
 .plans h2 { max-width: 520px; margin-top: 12px; }
+.pricing-page {
+  display: grid;
+  gap: 34px;
+}
+.pricing-hero {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.72fr) minmax(520px, 1.28fr);
+  gap: clamp(20px, 4vw, 42px);
+  align-items: start;
+}
+.pricing-hero h1 {
+  margin: 12px 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.4rem, 5vw, 4.7rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+.pricing-hero p {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
 .pricing { grid-template-columns: repeat(3, 1fr); }
 .pricing article { padding: 20px; }
 .pricing h3 { margin: 0 0 12px; }
 .pricing strong { font-family: Georgia, serif; font-size: 2rem; }
 .pricing p { color: var(--muted); line-height: 1.45; }
+.pricing-fit-grid,
+.pricing-faq {
+  display: grid;
+  gap: 14px;
+}
+.pricing-fit-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pricing-fit-grid article,
+.pricing-faq article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 10px 34px rgba(35, 46, 42, 0.06);
+}
+.pricing-fit-grid article {
+  padding: 20px;
+}
+.pricing-fit-grid svg {
+  color: #557867;
+}
+.pricing-fit-grid h3 {
+  margin: 12px 0 8px;
+  font-family: Georgia, serif;
+  font-size: 1.28rem;
+}
+.pricing-fit-grid p,
+.pricing-faq p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.pricing-outcomes {
+  display: grid;
+  gap: 18px;
+}
+.pricing-faq {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pricing-faq article {
+  padding: 18px;
+}
+.pricing-faq strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
 
 .onboarding {
   padding: 0 clamp(16px, 5vw, 70px) 72px;
@@ -3775,7 +3843,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .hero h1 { font-size: clamp(3rem, 13vw, 4.8rem); }
   .hero-panel, .hero-panel img { min-height: 360px; }
-  .trust-strip, .plans, .pricing, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .workflow-grid, .research-grid, .partner-page-grid, .preview-page, .compact-cards { grid-template-columns: 1fr; }
+  .trust-strip, .plans, .pricing, .pricing-hero, .pricing-fit-grid, .pricing-faq, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .workflow-grid, .research-grid, .partner-page-grid, .preview-page, .compact-cards { grid-template-columns: 1fr; }
   .page-section { padding-left: 16px; padding-right: 16px; }
   .page-head.compact { text-align: left; }
   .public-preview-frame { max-height: none; }

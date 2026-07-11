@@ -2367,14 +2367,7 @@ function App() {
       )}
 
       {route === '/pricing' && (
-      <section id="page-content" className="plans page-section">
-        <div>
-          <p className="eyebrow"><HeartHandshake size={16} /> Launch model</p>
-          <h2>Built for families first, with funeral-home revenue ready.</h2>
-          <p>Clear one-time plans help families buy without a long sales process, while partner pricing gives funeral homes a simple digital add-on.</p>
-        </div>
-        <Pricing />
-      </section>
+        <PricingPage onStart={() => openStep('person')} onPartners={() => navigate('/partners')} />
       )}
 
       {route === '/partners' && <PartnerMarketingPage site={site} onStart={() => openStep('partner')} onPricing={() => navigate('/pricing')} />}
@@ -2491,6 +2484,81 @@ function TrustResearchPage({ onStart }) {
         <button className="primary" onClick={onStart}>Review launch controls <ChevronRight size={18} /></button>
       </div>
     </section>
+  );
+}
+
+function PricingPage({ onStart, onPartners }) {
+  return (
+    <section id="page-content" className="pricing-page page-section">
+      <div className="pricing-hero">
+        <div>
+          <p className="eyebrow"><HeartHandshake size={16} /> Launch model</p>
+          <h1>Simple pricing for a sensitive, high-stakes job.</h1>
+          <p>Families should not need a sales call to share service details, collect memories, and preserve the archive. Funeral homes get a clear partner plan for repeatable family handoffs.</p>
+          <div className="hero-actions">
+            <button className="primary" onClick={onStart}>Start a family page <ChevronRight size={18} /></button>
+            <button className="secondary" onClick={onPartners}><HeartHandshake size={18} /> Partner workflow</button>
+          </div>
+        </div>
+        <Pricing />
+      </div>
+      <PricingGuidance />
+    </section>
+  );
+}
+
+function PricingGuidance() {
+  const fit = [
+    ['Family Page', 'Best when the family needs a private page, RSVP, QR card, memories, and service details without long-term archive planning.'],
+    ['Legacy Archive', 'Best when the family wants the program, memory book, aftercare packet, archive manifest, and anniversary care in one place.'],
+    ['Funeral Home', 'Best when a care team needs co-branded drafts, scoped co-admins, package status, and clean ownership handoff for many families.']
+  ];
+  const outcomes = [
+    ['Before the service', 'Private link, RSVP list, livestream details, guest-care notes, invite copy, and QR cards.'],
+    ['During the gathering', 'Guest guide, service program, day-of packet, support needs, and memory table prompts.'],
+    ['Afterward', 'Approved memories, memory book, thank-you tracker, anniversary prompts, closure log, and downloadable archive.']
+  ];
+  const questions = [
+    ['Can a page stay private?', 'Yes. Invite-only, passcode, hidden search, and family review controls are built into the workflow.'],
+    ['Do guests post directly?', 'No. Memories, photos, and voice notes go to family moderation before appearing publicly.'],
+    ['Can funeral homes hand pages back?', 'Yes. The Partner Desk keeps co-admin help scoped and gives families ownership, archive status, and next actions.']
+  ];
+
+  return (
+    <>
+      <div className="pricing-fit-grid">
+        {fit.map(([title, text]) => (
+          <article key={title}>
+            <Check size={18} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
+      <section className="pricing-outcomes">
+        <div className="page-head compact">
+          <p className="eyebrow"><Archive size={16} /> What the purchase covers</p>
+          <h2>Not a template fee. It covers the moments families actually need help with.</h2>
+        </div>
+        <div className="workflow-grid">
+          {outcomes.map(([title, text]) => (
+            <article key={title}>
+              <Sparkles size={20} />
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="pricing-faq">
+        {questions.map(([question, answer]) => (
+          <article key={question}>
+            <strong>{question}</strong>
+            <p>{answer}</p>
+          </article>
+        ))}
+      </section>
+    </>
   );
 }
 

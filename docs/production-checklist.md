@@ -6,6 +6,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 
 - Confirm the guided builder creates a complete memorial page without blank required sections.
 - Confirm `/`, `/builder`, `/preview`, `/pricing`, `/partners`, and `/trust` each have one clear job and do not force families through a long generic website-builder flow.
+- Confirm `/pricing` helps families and funeral homes choose a plan with fit guidance, concrete outcomes, privacy reassurance, and partner handoff value.
 - Confirm direct builder-section links open the right step, including `#settings`, `#desk`, and `#keepsakes`.
 - Confirm builder navigation readiness markers accurately show which sections are ready or need attention.
 - Confirm Launch Snapshot clearly groups readiness into Story, Guest Care, Sharing, and Preservation.
