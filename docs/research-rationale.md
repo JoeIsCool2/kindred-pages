@@ -4,6 +4,7 @@ Kindred Pages is designed around bereavement, family coordination, and memorial 
 
 ## Product Decisions
 
+- The multi-page structure reduces cognitive load by giving each audience one focused job: the home page orients, the builder creates, the preview shows the public result, pricing supports purchase decisions, partner pages speak to funeral homes, and trust pages handle privacy and family control.
 - Memory collection and archives support the continuing-bonds view of grief: many bereaved people maintain an ongoing relationship with the deceased through stories, objects, rituals, and shared remembrance. See Klass, Silverman, and Nickman's continuing-bonds work and related bereavement literature.
 - The builder combines story work with practical logistics because the dual-process model of coping with bereavement describes oscillation between loss-oriented and restoration-oriented stressors. Families often need both a place for meaning and a way to handle practical tasks.
 - Guest Care exists because social support is one of the best-supported buffers around stressful life events. Clear access, parking, schedule, contacts, and reception details reduce repeated coordination burden and make it easier for guests to show up helpfully.

@@ -7,6 +7,8 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 ## What Is Built
 
 - Guided memorial page builder
+- Multi-page product experience with focused Home, Builder, Preview, Pricing, Partners, and Trust pages
+- Browser-routed pages for `/builder`, `/preview`, `/pricing`, `/partners`, and `/trust`
 - Guided gathering-type presets for celebration-of-life, funeral, graveside, online remembrance, and private archive pages
 - Direct builder-section links for Person, Story, Service, Guest Care, Memories, Family Desk, Partner Desk, Announcements, Keepsakes, and Settings
 - Section readiness markers in the builder navigation so families can see what needs attention
@@ -107,6 +109,8 @@ The static production output is generated in `dist/`.
 `npm run verify:config` expects real production values in `.env.local`; it will fail against blank demo values from `.env.example`.
 
 Public trust pages are served from `/privacy.html`, `/terms.html`, and `/security.txt`.
+
+The app experience is split into focused pages: `/` explains the product, `/builder` creates the memorial, `/preview` shows the guest-facing page, `/pricing` presents plans, `/partners` supports funeral-home buyers, and `/trust` explains privacy, moderation, archive, and research-backed product decisions.
 
 ## Deployment
 

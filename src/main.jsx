@@ -510,6 +510,12 @@ function stepFromHash(hash) {
   return steps.some((step) => step.id === id) ? id : '';
 }
 
+function routeFromPath(pathname) {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  if (['/builder', '/preview', '/pricing', '/partners', '/trust'].includes(clean)) return clean;
+  return '/';
+}
+
 function getLaunchChecks(site) {
   return [
     { label: 'Name and life dates added', done: Boolean(site.name && site.lifespan) },
@@ -870,6 +876,7 @@ function escapeHtml(value) {
 function App() {
   const [site, setSite] = useState(starter);
   const [active, setActive] = useState(() => stepFromHash(window.location.hash) || 'person');
+  const [route, setRoute] = useState(() => routeFromPath(window.location.pathname));
   const [previewMode, setPreviewMode] = useState('desktop');
   const [savedAt, setSavedAt] = useState('');
   const [storageStatus, setStorageStatus] = useState(persistenceLabel());
@@ -894,6 +901,12 @@ function App() {
     syncFromHash();
     window.addEventListener('hashchange', syncFromHash);
     return () => window.removeEventListener('hashchange', syncFromHash);
+  }, []);
+
+  useEffect(() => {
+    const syncRoute = () => setRoute(routeFromPath(window.location.pathname));
+    window.addEventListener('popstate', syncRoute);
+    return () => window.removeEventListener('popstate', syncRoute);
   }, []);
 
   useEffect(() => {
@@ -933,12 +946,19 @@ function App() {
   const update = (field, value) => setSite((current) => ({ ...current, [field]: value }));
   const updateMessage = (field, value) => setSite((current) => ({ ...current, messages: { ...current.messages, [field]: value } }));
   const updateLivestreamPlan = (field, value) => setSite((current) => ({ ...current, livestreamPlan: { ...current.livestreamPlan, [field]: value } }));
+  const navigate = (path) => {
+    const next = routeFromPath(path);
+    window.history.pushState(null, '', next);
+    setRoute(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   const openStep = (stepId) => {
     setActive(stepId);
-    if (window.location.hash !== `#${stepId}`) {
-      window.history.pushState(null, '', `#${stepId}`);
+    if (window.location.pathname !== '/builder' || window.location.hash !== `#${stepId}`) {
+      window.history.pushState(null, '', `/builder#${stepId}`);
+      setRoute('/builder');
     }
-    document.querySelector('#builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => document.querySelector('#builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
   };
   const addActivity = (action, detail) => {
     setSite((current) => ({
@@ -2171,9 +2191,11 @@ function App() {
 
   return (
     <main className={`app template-${site.template}`}>
-      <a className="skip-link" href="#builder">Skip to builder</a>
-      <TopBar savedAt={savedAt} progress={progress} storageStatus={storageStatus} onCopy={copyLink} onArchive={downloadJson} onPrint={print} />
-      <section className="hero">
+      <a className="skip-link" href={route === '/builder' ? '#builder' : '#page-content'}>{route === '/builder' ? 'Skip to builder' : 'Skip to page content'}</a>
+      <TopBar route={route} savedAt={savedAt} progress={progress} storageStatus={storageStatus} onNavigate={navigate} onBuilder={() => openStep(active)} onCopy={copyLink} onArchive={downloadJson} onPrint={print} />
+      {route === '/' && (
+        <>
+      <section id="page-content" className="hero">
         <div className="hero-copy">
           <div className="eyebrow"><Flower2 size={16} /> Kindred Pages</div>
           <h1>Memorial websites families can finish gently.</h1>
@@ -2206,7 +2228,11 @@ function App() {
         <Capability icon={QrCode} title="Service-ready" text="QR cards, printable programs, livestream, RSVP, and donation links." />
         <Capability icon={Archive} title="Family archive" text="Downloadable keepsake bundle and long-term preservation controls." />
       </section>
+      <HomeWorkflow onStart={() => openStep('person')} onPreview={() => navigate('/preview')} onTrust={() => navigate('/trust')} />
+        </>
+      )}
 
+      {route === '/builder' && (
       <section id="builder" className="builder-shell">
         <aside className="rail" aria-label="Builder sections">
           <div>
@@ -2249,27 +2275,175 @@ function App() {
           </div>
         </aside>
       </section>
+      )}
 
-      <section className="plans">
+      {route === '/preview' && (
+        <section id="page-content" className="preview-page">
+          <div className="page-head">
+            <p className="eyebrow"><Eye size={16} /> Family-facing page</p>
+            <h1>A clean memorial page guests can understand immediately.</h1>
+            <p>Guests see service details, RSVP, support options, livestream information, and a gentle memory form without needing to learn the builder.</p>
+            <div className="hero-actions">
+              <button className="primary" onClick={() => openStep('service')}>Edit details <ChevronRight size={18} /></button>
+              <button className="secondary" onClick={copyLink}><Globe2 size={18} /> Copy share link</button>
+            </div>
+          </div>
+          <div className="public-preview-frame">
+            <MemorialPage site={site} shareUrl={shareUrl} qrDataUrl={qrDataUrl} onGuestMemory={submitGuestMemory} onGuestRsvp={addRsvp} onSupportClaim={claimSupportNeed} onCalendar={downloadCalendar} />
+          </div>
+        </section>
+      )}
+
+      {route === '/pricing' && (
+      <section id="page-content" className="plans page-section">
         <div>
           <p className="eyebrow"><HeartHandshake size={16} /> Launch model</p>
           <h2>Built for families first, with funeral-home revenue ready.</h2>
+          <p>Clear one-time plans help families buy without a long sales process, while partner pricing gives funeral homes a simple digital add-on.</p>
         </div>
         <Pricing />
       </section>
+      )}
 
-      <Onboarding />
-      <TrustCenter />
+      {route === '/partners' && <PartnerMarketingPage site={site} onStart={() => openStep('partner')} onPricing={() => navigate('/pricing')} />}
+      {route === '/trust' && (
+        <>
+          <TrustCenter />
+          <TrustResearchPage onStart={() => openStep('settings')} />
+        </>
+      )}
 
       {toast && <div className="toast" role="status" aria-live="polite"><Check size={16} /> {toast}</div>}
     </main>
   );
 }
 
-function TopBar({ savedAt, progress, storageStatus, onCopy, onArchive, onPrint }) {
+function HomeWorkflow({ onStart, onPreview, onTrust }) {
+  const pages = [
+    { icon: FileHeart, title: 'Start with the person', text: 'Names, dates, gathering type, tone, and a few gentle story prompts get the family unstuck quickly.', action: 'Open builder', onClick: onStart },
+    { icon: UserCheck, title: 'Make guests feel cared for', text: 'Service access, parking, children, rituals, livestream, RSVP, and support needs sit in one calm place.', action: 'See preview', onClick: onPreview },
+    { icon: Shield, title: 'Review before sharing', text: 'Privacy, sensitive details, moderation, launch approval, and archive controls are checked before the page goes out.', action: 'View trust', onClick: onTrust }
+  ];
+
+  return (
+    <section className="page-section workflow-section">
+      <div className="page-head compact">
+        <p className="eyebrow"><Sparkles size={16} /> Simple by design</p>
+        <h2>Each page does one job, so families are never staring at a blank website builder.</h2>
+        <p>The workflow follows bereavement research: hold the story, reduce practical stress, protect privacy, and make support easier to give.</p>
+      </div>
+      <div className="workflow-grid">
+        {pages.map(({ icon: Icon, title, text, action, onClick }) => (
+          <article key={title}>
+            <Icon size={22} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+            <button className="secondary" onClick={onClick}>{action} <ChevronRight size={16} /></button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PartnerMarketingPage({ site, onStart, onPricing }) {
+  const partnerStats = [
+    ['Family drafts', site.partnerDrafts?.length || 0],
+    ['Package', site.partner.defaultPackage],
+    ['Handoff', site.partner.handoffStatus],
+    ['Billing', site.partner.billingMode]
+  ];
+
+  return (
+    <section id="page-content" className="page-section partner-page">
+      <div className="page-head">
+        <p className="eyebrow"><HeartHandshake size={16} /> Funeral-home partners</p>
+        <h1>A digital memorial add-on families can actually finish.</h1>
+        <p>Partner teams can prepare a polished draft, co-brand the handoff, help with service logistics, and leave final ownership with the family.</p>
+        <div className="hero-actions">
+          <button className="primary" onClick={onStart}>Open Partner Desk <ChevronRight size={18} /></button>
+          <button className="secondary" onClick={onPricing}><CreditCard size={18} /> See plans</button>
+        </div>
+      </div>
+      <div className="partner-page-grid">
+        <article>
+          <h2>{site.partner.organization}</h2>
+          <p>{site.partner.brandLine}</p>
+          <div className="partner-mark-large">{site.partner.logoInitials}</div>
+        </article>
+        <div className="workflow-grid compact-cards">
+          {partnerStats.map(([label, value]) => (
+            <article key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </article>
+          ))}
+        </div>
+      </div>
+      <div className="workflow-grid">
+        <article><Users size={22} /><h3>Scoped collaboration</h3><p>Funeral homes can help coordinate pages without owning the family archive or private memories.</p></article>
+        <article><Printer size={22} /><h3>Service-day exports</h3><p>Programs, QR cards, day-of packets, guest guides, and coordinator briefs are ready for real gatherings.</p></article>
+        <article><Archive size={22} /><h3>Clean handoff</h3><p>Families receive ownership notes, archive status, helper roles, privacy choices, and the next actions in one packet.</p></article>
+      </div>
+    </section>
+  );
+}
+
+function TrustResearchPage({ onStart }) {
+  const principles = [
+    ['Continuing bonds', 'Memory collection, archives, and later anniversary prompts help families keep a meaningful connection through stories and rituals.'],
+    ['Dual-process coping', 'The app separates story work from practical tasks because bereaved families often move between emotional and logistical needs.'],
+    ['Social support buffering', 'Guest care, RSVP, support needs, and clear access details make it easier for people to show up helpfully.'],
+    ['Family control', 'Moderation, privacy review, sensitive-details review, and noindex defaults reduce avoidable exposure in a vulnerable moment.']
+  ];
+
+  return (
+    <section className="page-section research-page">
+      <div className="page-head compact">
+        <p className="eyebrow"><Search size={16} /> Research-backed structure</p>
+        <h2>The product is niche on purpose: memorial pages need different rules than generic websites.</h2>
+        <p>Kindred Pages is organized around bereavement, family coordination, privacy, and practical guest care rather than templates and marketing sections.</p>
+      </div>
+      <div className="research-grid">
+        {principles.map(([title, text]) => (
+          <article key={title}>
+            <Check size={18} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
+      <div className="source-note">
+        <strong>Sources used in the product rationale</strong>
+        <p>Klass, Silverman, and Nickman on continuing bonds; Stroebe and Schut on dual-process coping; Cohen and Wills on social support buffering; Walter and later online memorial research on biography, memory, and digital remembrance.</p>
+        <button className="primary" onClick={onStart}>Review launch controls <ChevronRight size={18} /></button>
+      </div>
+    </section>
+  );
+}
+
+function TopBar({ route, savedAt, progress, storageStatus, onNavigate, onBuilder, onCopy, onArchive, onPrint }) {
+  const navItems = [
+    ['/', 'Home'],
+    ['/builder', 'Builder'],
+    ['/preview', 'Preview'],
+    ['/pricing', 'Pricing'],
+    ['/partners', 'Partners'],
+    ['/trust', 'Trust']
+  ];
+
   return (
     <header className="topbar">
-      <div className="brand"><span className="brand-mark">K</span><span>Kindred Pages</span></div>
+      <button className="brand brand-button" onClick={() => onNavigate('/')}>
+        <span className="brand-mark">K</span><span>Kindred Pages</span>
+      </button>
+      <nav className="site-nav" aria-label="Main pages">
+        {navItems.map(([path, label]) => (
+          <button key={path} className={route === path ? 'selected' : ''} aria-current={route === path ? 'page' : undefined} onClick={() => (path === '/builder' ? onBuilder() : onNavigate(path))}>
+            {label}
+          </button>
+        ))}
+      </nav>
       <div className="top-actions">
         <span className="save-note"><Save size={15} /> Saved {savedAt || 'now'}</span>
         <span className="storage-note"><Archive size={15} /> {storageStatus}</span>

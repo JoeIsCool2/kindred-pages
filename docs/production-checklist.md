@@ -5,6 +5,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 ## Product
 
 - Confirm the guided builder creates a complete memorial page without blank required sections.
+- Confirm `/`, `/builder`, `/preview`, `/pricing`, `/partners`, and `/trust` each have one clear job and do not force families through a long generic website-builder flow.
 - Confirm direct builder-section links open the right step, including `#settings`, `#desk`, and `#keepsakes`.
 - Confirm builder navigation readiness markers accurately show which sections are ready or need attention.
 - Confirm Launch Snapshot clearly groups readiness into Story, Guest Care, Sharing, and Preservation.
@@ -107,4 +108,4 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Run dependency audit when registry access is available.
 - Confirm production CSP allows approved HTTPS API, image, media, checkout, and storage endpoints while blocking framing and unsafe scripts.
 - Deploy `dist/` through the selected host.
-- Smoke test `/`, `/privacy.html`, `/terms.html`, `/security.txt`, `/robots.txt`, and `/sitemap.xml`.
+- Smoke test `/`, `/builder`, `/preview`, `/pricing`, `/partners`, `/trust`, `/privacy.html`, `/terms.html`, `/security.txt`, `/robots.txt`, and `/sitemap.xml`.
