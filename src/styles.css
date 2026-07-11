@@ -367,6 +367,155 @@ a:focus-visible {
 .workflow-grid .secondary {
   margin-top: 8px;
 }
+.templates-page {
+  display: grid;
+  gap: 28px;
+}
+.templates-hero {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.72fr) minmax(360px, 0.28fr);
+  gap: clamp(20px, 4vw, 42px);
+  align-items: start;
+}
+.template-advisor,
+.template-choice,
+.template-research {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 253, 248, 0.84)),
+    #fff;
+  box-shadow: 0 14px 42px rgba(35, 46, 42, 0.07);
+}
+.template-advisor {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+}
+.template-advisor > strong {
+  font-family: Georgia, serif;
+  font-size: 1.38rem;
+}
+.template-advisor article {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.template-advisor svg,
+.template-choice svg,
+.template-research svg {
+  color: #557867;
+}
+.template-advisor span {
+  display: block;
+  font-weight: 850;
+}
+.template-advisor p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.template-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+.template-choice {
+  display: grid;
+  align-content: start;
+  min-height: 430px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.template-choice::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: #557867;
+}
+.template-choice-archive::before { background: #8a775f; }
+.template-choice-funeral::before { background: #766b8c; }
+.template-choice-graveside::before { background: #8d5f47; }
+.template-choice-virtual::before { background: #547a91; }
+.template-choice-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #557867;
+}
+.template-choice-top span {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: #50645d;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+.template-choice h2 {
+  margin: 18px 0 10px;
+  font-family: Georgia, serif;
+  font-size: clamp(1.45rem, 2.2vw, 2.05rem);
+  line-height: 1.03;
+  overflow-wrap: anywhere;
+}
+.template-choice p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.template-choice ul {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 14px 0;
+  list-style: none;
+}
+.template-choice li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4c5f59;
+  font-weight: 760;
+}
+.template-proof {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 8px;
+  margin: 4px 0 18px;
+  padding: 12px;
+  border: 1px solid #e3ddd2;
+  border-radius: 8px;
+  background: #fbf8f0;
+  color: var(--muted);
+  line-height: 1.42;
+}
+.template-choice .primary {
+  align-self: end;
+  width: 100%;
+  justify-content: center;
+}
+.template-research {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.38fr) minmax(320px, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 24px;
+}
+.template-research h2 {
+  margin: 8px 0 0;
+  font-family: Georgia, serif;
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  line-height: 1.04;
+}
+.template-research p {
+  color: var(--muted);
+  line-height: 1.58;
+}
 .preview-page {
   display: grid;
   grid-template-columns: minmax(280px, 0.42fr) minmax(420px, 0.58fr);
@@ -3974,7 +4123,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .hero h1 { font-size: clamp(3rem, 13vw, 4.8rem); }
   .hero-panel, .hero-panel img { min-height: 360px; }
-  .trust-strip, .plans, .pricing, .pricing-hero, .pricing-fit-grid, .pricing-faq, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .audience-grid, .workflow-grid, .safeguard-grid, .research-grid, .partner-landing, .partner-page-grid, .partner-flow, .partner-outcomes, .preview-page, .compact-cards { grid-template-columns: 1fr; }
+  .trust-strip, .plans, .pricing, .pricing-hero, .pricing-fit-grid, .pricing-faq, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .audience-grid, .workflow-grid, .safeguard-grid, .research-grid, .templates-hero, .template-choice-grid, .template-research, .partner-landing, .partner-page-grid, .partner-flow, .partner-outcomes, .preview-page, .compact-cards { grid-template-columns: 1fr; }
   .page-section { padding-left: 16px; padding-right: 16px; }
   .page-head.compact { text-align: left; }
   .public-preview-frame { max-height: none; }
@@ -4015,6 +4164,8 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   .placement-statuses button:last-child { margin-left: 0; }
   .checkout-summary { grid-template-columns: 1fr; }
   .checkout-summary button { width: 100%; }
+  .template-choice { min-height: auto; }
+  .template-research button { width: 100%; }
   .guest-row { grid-template-columns: 1fr; }
   .guest-row button { width: 100%; }
   .day-of-task { grid-template-columns: 34px 1fr; }

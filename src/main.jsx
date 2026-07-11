@@ -512,7 +512,7 @@ function stepFromHash(hash) {
 
 function routeFromPath(pathname) {
   const clean = pathname.replace(/\/+$/, '') || '/';
-  if (['/builder', '/preview', '/pricing', '/partners', '/trust'].includes(clean)) return clean;
+  if (['/builder', '/templates', '/preview', '/pricing', '/partners', '/trust'].includes(clean)) return clean;
   return '/';
 }
 
@@ -525,6 +525,10 @@ function getRouteMetadata(route, site, productionUrl) {
     '/builder': {
       title: 'Build a Memorial Page | Kindred Pages',
       description: 'A focused memorial builder for story, service details, guest care, memories, keepsakes, privacy review, and launch approval.'
+    },
+    '/templates': {
+      title: 'Memorial Website Templates | Kindred Pages',
+      description: 'Choose a research-backed memorial website starting point for a celebration of life, funeral service, graveside gathering, online remembrance, or private family archive.'
     },
     '/preview': {
       title: `${site.name || 'Memorial'} Preview | Kindred Pages`,
@@ -2305,6 +2309,17 @@ function App() {
         </>
       )}
 
+      {route === '/templates' && (
+        <TemplatesPage
+          onApply={(preset) => {
+            applyGatheringPreset(preset);
+            openStep('person');
+          }}
+          onPreview={() => navigate('/preview')}
+          onTrust={() => navigate('/trust')}
+        />
+      )}
+
       {route === '/builder' && (
       <section id="builder" className="builder-shell">
         <aside className="rail" aria-label="Builder sections">
@@ -2436,6 +2451,109 @@ function HomeAudienceMap({ onStart, onPreview, onPartners, onTrust }) {
           </article>
         ))}
       </div>
+    </section>
+  );
+}
+
+function TemplatesPage({ onApply, onPreview, onTrust }) {
+  const templateDetails = {
+    celebration: {
+      icon: Flower2,
+      outcome: 'A warm public or invite-only page with story prompts, photo sharing, reception details, and memory-table wording.',
+      includes: ['Story basket', 'Reception notes', 'Guest memory prompts'],
+      proof: 'Good when social support and shared storytelling are the main jobs.'
+    },
+    funeral: {
+      icon: FileHeart,
+      outcome: 'A structured service page with order-of-service wording, visitation details, formal privacy defaults, and family review.',
+      includes: ['Formal schedule', 'Guest book flow', 'Sensitive review'],
+      proof: 'Good when clarity, ritual order, and family approval need to come first.'
+    },
+    graveside: {
+      icon: MapPin,
+      outcome: 'A concise outdoor-service page focused on arrival, parking, weather, seating, and simple remembrance.',
+      includes: ['Parking guidance', 'Weather note', 'Brief service flow'],
+      proof: 'Good when guests need practical help more than a long page.'
+    },
+    virtual: {
+      icon: Video,
+      outcome: 'A private online remembrance with livestream, replay, time-zone-friendly copy, tech contact, and backup instructions.',
+      includes: ['Livestream hub', 'Replay status', 'Tech backup'],
+      proof: 'Good when remote guests need confidence before the service starts.'
+    },
+    archive: {
+      icon: Archive,
+      outcome: 'A private family archive for gathering photos, memories, contacts, care notes, and future remembrance plans.',
+      includes: ['Private collection', 'Future plans', 'Archive controls'],
+      proof: 'Good when the family needs preservation before public sharing.'
+    }
+  };
+
+  const choiceHelp = [
+    ['Need guests to attend?', 'Choose Celebration, Funeral, Graveside, or Online based on the gathering format.'],
+    ['Need privacy first?', 'Choose Funeral, Online, or Private Archive for stricter sharing defaults.'],
+    ['Not ready to announce?', 'Choose Private Family Archive and collect memories before publishing anything public.']
+  ];
+
+  return (
+    <section id="page-content" className="page-section templates-page">
+      <div className="templates-hero">
+        <div className="page-head">
+          <p className="eyebrow"><Sparkles size={16} /> Guided starting points</p>
+          <h1>Choose the memorial shape before touching the builder.</h1>
+          <p>Each template applies the right privacy, schedule, guest-care, livestream, and archive defaults so families start with a recognizable situation instead of a blank website.</p>
+          <div className="hero-actions">
+            <button className="primary" onClick={() => onApply(gatheringPresets[0])}>Use the most common setup <ChevronRight size={18} /></button>
+            <button className="secondary" onClick={onPreview}><Eye size={18} /> See guest view</button>
+          </div>
+        </div>
+        <aside className="template-advisor" aria-label="Template guidance">
+          <strong>Fast choice guide</strong>
+          {choiceHelp.map(([title, text]) => (
+            <article key={title}>
+              <Check size={17} />
+              <div>
+                <span>{title}</span>
+                <p>{text}</p>
+              </div>
+            </article>
+          ))}
+        </aside>
+      </div>
+
+      <div className="template-choice-grid">
+        {gatheringPresets.map((preset) => {
+          const detail = templateDetails[preset.id];
+          const Icon = detail.icon;
+          return (
+            <article key={preset.id} className={`template-choice template-choice-${preset.id}`}>
+              <div className="template-choice-top">
+                <Icon size={23} />
+                <span>{templates[preset.patch.template]?.label || preset.patch.template}</span>
+              </div>
+              <h2>{preset.label}</h2>
+              <p>{detail.outcome}</p>
+              <ul>
+                {detail.includes.map((item) => <li key={item}><Check size={15} /> {item}</li>)}
+              </ul>
+              <div className="template-proof">
+                <Search size={15} />
+                <span>{detail.proof}</span>
+              </div>
+              <button className="primary" onClick={() => onApply(preset)}>Start with this <ChevronRight size={17} /></button>
+            </article>
+          );
+        })}
+      </div>
+
+      <section className="template-research">
+        <div>
+          <p className="eyebrow"><Search size={16} /> Why templates work here</p>
+          <h2>Defaults reduce decisions, but families keep control.</h2>
+        </div>
+        <p>Kindred Pages uses situation-specific defaults because bereavement work mixes emotional story work with urgent coordination. The template only sets the first draft: families can still edit every word, privacy choice, schedule item, and keepsake before launch.</p>
+        <button className="secondary" onClick={onTrust}><Shield size={17} /> Review trust model</button>
+      </section>
     </section>
   );
 }
@@ -2648,6 +2766,7 @@ function TopBar({ route, savedAt, progress, storageStatus, onNavigate, onBuilder
   const navItems = [
     ['/', 'Home'],
     ['/builder', 'Builder'],
+    ['/templates', 'Templates'],
     ['/preview', 'Preview'],
     ['/pricing', 'Pricing'],
     ['/partners', 'Partners'],

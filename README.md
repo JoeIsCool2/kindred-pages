@@ -7,9 +7,10 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 ## What Is Built
 
 - Guided memorial page builder
-- Multi-page product experience with focused Home, Builder, Preview, Pricing, Partners, and Trust pages
+- Multi-page product experience with focused Home, Builder, Templates, Preview, Pricing, Partners, and Trust pages
 - Home page audience map for family admins, guests, funeral homes, and family archives
-- Browser-routed pages for `/builder`, `/preview`, `/pricing`, `/partners`, and `/trust`
+- Browser-routed pages for `/builder`, `/templates`, `/preview`, `/pricing`, `/partners`, and `/trust`
+- Templates page with situation-specific starting points for celebration-of-life, funeral, graveside, online remembrance, and private archive pages
 - Pricing page with plan-fit guidance, family outcomes, partner value, and buying questions
 - Partner page with intake-to-handoff workflow, operational outcomes, and scoped family ownership messaging
 - Trust page with family safeguards and peer-reviewed evidence mapped to product choices

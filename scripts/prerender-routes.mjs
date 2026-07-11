@@ -21,6 +21,12 @@ const routes = [
     priority: '0.9'
   },
   {
+    path: '/templates',
+    title: 'Memorial Website Templates | Kindred Pages',
+    description: 'Choose a research-backed memorial website starting point for a celebration of life, funeral service, graveside gathering, online remembrance, or private family archive.',
+    priority: '0.85'
+  },
+  {
     path: '/preview',
     title: 'Memorial Page Preview | Kindred Pages',
     description: 'Preview the guest-facing memorial page with RSVP, livestream, support options, and gentle memory sharing.',
