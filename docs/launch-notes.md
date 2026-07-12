@@ -20,6 +20,7 @@
 - Connect authentication.
 - Connect database tables for memorials, memories, RSVPs, co-admins, support links, and launch tasks.
 - Connect photo/object storage.
+- Configure `/api/media` with Supabase storage credentials and a private media bucket.
 - Add transactional email templates.
 - Add Stripe or another payment provider.
 - Configure `/api/checkout` with a Stripe Checkout URL or payment link base.

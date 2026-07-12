@@ -883,8 +883,8 @@ function parseGuestImport(text) {
 function normalizePhotos(photos = []) {
   return photos.map((photo, index) => (
     typeof photo === 'string'
-      ? { src: photo, caption: '', isCover: index === 0, isPublic: true }
-      : { caption: '', isCover: false, isPublic: true, ...photo }
+      ? { src: photo, caption: '', isCover: index === 0, isPublic: true, uploadStatus: 'Local preview' }
+      : { caption: '', isCover: false, isPublic: true, uploadStatus: photo.storagePath ? 'Storage planned' : 'Local preview', ...photo }
   ));
 }
 
@@ -1083,15 +1083,17 @@ function App() {
   const checkoutUrl = import.meta.env.VITE_STRIPE_CHECKOUT_URL || '/api/checkout';
   const publishEndpoint = import.meta.env.VITE_PUBLISH_ENDPOINT || '/api/publish';
   const inviteEndpoint = import.meta.env.VITE_INVITE_ENDPOINT || '/api/invites';
+  const mediaEndpoint = import.meta.env.VITE_MEDIA_ENDPOINT || '/api/media';
   const integrationChecks = useMemo(() => ([
     { label: 'Cloud drafts', detail: import.meta.env.VITE_SUPABASE_URL ? 'Supabase URL set' : 'Needs Supabase URL', ready: Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY), icon: Archive },
+    { label: 'Media storage', detail: mediaEndpoint ? 'Media endpoint set' : 'Needs media endpoint', ready: Boolean(mediaEndpoint), icon: Image },
     { label: 'Payments', detail: checkoutUrl ? 'Checkout URL set' : 'Needs checkout URL', ready: Boolean(checkoutUrl && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY), icon: CreditCard },
     { label: 'Publishing', detail: publishEndpoint ? 'Publish endpoint set' : 'Needs publish endpoint', ready: Boolean(publishEndpoint), icon: Rocket },
     { label: 'Invite delivery', detail: inviteEndpoint ? 'Invite endpoint set' : 'Needs invite endpoint', ready: Boolean(inviteEndpoint), icon: Send },
     { label: 'Support email', detail: import.meta.env.VITE_SUPPORT_EMAIL || 'Needs support email', ready: Boolean(import.meta.env.VITE_SUPPORT_EMAIL), icon: Mail },
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
-  ]), [checkoutUrl, inviteEndpoint, publishEndpoint, productionUrl]);
+  ]), [checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
 
   useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);
@@ -1891,18 +1893,90 @@ function App() {
     }
   };
 
+  const planMediaStorage = async (files) => {
+    if (!mediaEndpoint || !files.length) return;
+
+    const packet = {
+      slug: site.slug || 'memorial',
+      visibility: site.privacy === 'public' ? 'public' : 'private',
+      files: files.map((file) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size
+      }))
+    };
+
+    try {
+      const response = await fetch(mediaEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(packet)
+      });
+      if (!response.ok) throw new Error('Media endpoint rejected the upload packet');
+      const result = await response.json().catch(() => ({}));
+      if (result.status === 'configuration-needed') {
+        setSite((current) => ({
+          ...current,
+          photos: current.photos.map((photo) => (
+            photo.uploadBatch === packet.slug && !photo.storagePath
+              ? { ...photo, uploadStatus: 'Needs storage setup' }
+              : photo
+          ))
+        }));
+        addActivity('Media storage needed', 'The media endpoint is live but still needs Supabase storage credentials.');
+        setToast('Photo storage needs setup');
+        return;
+      }
+
+      const uploads = result.uploads || [];
+      setSite((current) => ({
+        ...current,
+        photos: current.photos.map((photo) => {
+          if (photo.uploadBatch !== packet.slug || photo.storagePath) return photo;
+          const upload = uploads.find((item) => item.name === photo.fileName);
+          return upload ? { ...photo, storagePath: upload.storagePath, uploadStatus: 'Storage ready' } : photo;
+        })
+      }));
+      addActivity('Media storage planned', `${uploads.length} photo upload target${uploads.length === 1 ? '' : 's'} prepared.`);
+      setToast('Photo storage prepared');
+    } catch {
+      setSite((current) => ({
+        ...current,
+        photos: current.photos.map((photo) => (
+          photo.uploadBatch === packet.slug && !photo.storagePath
+            ? { ...photo, uploadStatus: 'Local fallback' }
+            : photo
+        ))
+      }));
+      addActivity('Media storage fallback', 'Photos stayed available locally because the media endpoint could not prepare upload targets.');
+      setToast('Photos saved locally');
+    }
+  };
+
   const handlePhotos = (files) => {
-    Array.from(files).slice(0, 8).forEach((file) => {
+    const selectedFiles = Array.from(files).slice(0, 8);
+    selectedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => setSite((current) => ({
         ...current,
         photos: [
           ...current.photos,
-          { src: reader.result, caption: '', isCover: !current.photos.length, isPublic: true }
+          {
+            src: reader.result,
+            caption: '',
+            isCover: !current.photos.length,
+            isPublic: true,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            uploadBatch: site.slug || 'memorial',
+            uploadStatus: mediaEndpoint ? 'Planning storage' : 'Local preview'
+          }
         ]
       }));
       reader.readAsDataURL(file);
     });
+    planMediaStorage(selectedFiles);
   };
 
   const setCoverPhoto = (index) => {
@@ -4574,6 +4648,9 @@ function PhotoUploader({ photos, onFiles, onRemove, onUpdate, onCover }) {
             <button className={photo.isPublic === false ? '' : 'selected'} onClick={() => onUpdate(index, { isPublic: photo.isPublic === false })}>{photo.isPublic === false ? <Eye size={15} /> : <Check size={15} />} {photo.isPublic === false ? 'Show' : 'Public'}</button>
             <button onClick={() => onRemove(index)}><Trash2 size={15} /></button>
           </div>
+          <small className={photo.uploadStatus?.includes('Storage') ? 'photo-status ready' : 'photo-status'}>
+            {photo.uploadStatus || 'Local preview'}
+          </small>
           <input value={photoCaption(photo)} onChange={(event) => onUpdate(index, { caption: event.target.value })} placeholder="Caption or names" />
         </article>
       ))}

@@ -125,7 +125,7 @@ Public trust pages are served from `/privacy.html`, `/terms.html`, and `/securit
 
 The app experience is split into focused pages: `/` explains the product, `/builder` creates the memorial, `/preview` shows the guest-facing page, `/pricing` presents plans, `/partners` supports funeral-home buyers, and `/trust` explains privacy, moderation, archive, and research-backed product decisions.
 
-Vercel Functions are included for `/api/checkout`, `/api/publish`, `/api/invites`, and `/api/health`. They provide production integration targets for checkout redirection, launch-packet publishing, guest invite delivery, and integration health checks. Without server secrets they return configuration-needed responses instead of marking the backend complete.
+Vercel Functions are included for `/api/checkout`, `/api/publish`, `/api/media`, `/api/invites`, and `/api/health`. They provide production integration targets for checkout redirection, launch-packet publishing, private media upload planning, guest invite delivery, and integration health checks. Without server secrets they return configuration-needed responses instead of marking the backend complete.
 
 ## Deployment
 
@@ -137,14 +137,14 @@ Required production services for a real launch:
 
 - Authentication for family admins and funeral-home partners
 - Database storage for memorial pages, RSVPs, memories, service programs, support links, and plans
-- Object storage for uploaded photos and archive exports
+- Object storage for uploaded photos, signed media upload targets, and archive exports
 - Email delivery or webhook delivery for invite links, contribution prompts, and anniversary reminders
 - Payment processing for one-time family plans and funeral-home subscriptions
 - Publish endpoint for launch packets, domain setup, and invite batch status
 - Open Graph, canonical URL, share image, and robots metadata publishing
 - Moderation and activity logging for guest submissions, exports, helper invites, and launch actions
 
-The current frontend is launch-shaped and production-buildable, with Vercel Function scaffolds for checkout, publishing, and invite delivery. It still uses local browser storage as its data layer until hosted services and server secrets are connected.
+The current frontend is launch-shaped and production-buildable, with Vercel Function scaffolds for checkout, publishing, media storage, and invite delivery. It still uses local browser storage as its data layer until hosted services and server secrets are connected.
 
 See [docs/backend-contract.md](docs/backend-contract.md) and [docs/schema.sql](docs/schema.sql) for the production data model and API contract.
 Use [docs/storage-integration.md](docs/storage-integration.md) when connecting cloud draft persistence.

@@ -23,6 +23,7 @@ const required = [
   ['VITE_STRIPE_CHECKOUT_URL', 'Hosted checkout or checkout function URL'],
   ['VITE_PUBLISH_ENDPOINT', 'Publish endpoint for launch packets'],
   ['VITE_INVITE_ENDPOINT', 'Invite delivery endpoint for guest batches'],
+  ['VITE_MEDIA_ENDPOINT', 'Media upload planning endpoint for photo storage'],
   ['VITE_SUPPORT_EMAIL', 'Reachable support email']
 ];
 
@@ -33,6 +34,7 @@ const optional = [
   ['STRIPE_PAYMENT_LINK_BASE_URL', 'Server-side Stripe payment link fallback'],
   ['SUPABASE_URL', 'Server-side Supabase REST URL for publish endpoint'],
   ['SUPABASE_SERVICE_ROLE_KEY', 'Server-side Supabase service role key for publish endpoint'],
+  ['MEDIA_BUCKET', 'Private object-storage bucket for family photos'],
   ['INVITE_WEBHOOK_URL', 'Server-side invite delivery webhook'],
   ['INVITE_WEBHOOK_SECRET', 'Optional invite webhook bearer secret'],
   ['RESEND_API_KEY', 'Server-side Resend key for invite email delivery'],

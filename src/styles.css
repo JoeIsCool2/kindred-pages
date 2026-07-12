@@ -1285,6 +1285,22 @@ input:focus, textarea:focus { border-color: #5b7f6b; box-shadow: 0 0 0 3px rgba(
   color: #fff;
   background: #557867;
 }
+.photo-status {
+  justify-self: start;
+  width: fit-content;
+  padding: 4px 8px;
+  border: 1px solid #e4dccd;
+  border-radius: 999px;
+  color: #7a5b4d;
+  background: #fff6ef;
+  font-size: 0.72rem;
+  font-weight: 820;
+}
+.photo-status.ready {
+  color: #3e5e50;
+  border-color: #cbded2;
+  background: #eef5f0;
+}
 
 .list-row {
   display: grid;

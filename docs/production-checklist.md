@@ -76,6 +76,8 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Connect database tables from `docs/schema.sql`.
 - Connect Supabase draft persistence from `docs/storage-integration.md`.
 - Connect private object storage for photos, gallery captions, cover-photo choice, visibility settings, and archive exports.
+- Set `MEDIA_BUCKET` and confirm `/api/media` returns signed private upload targets for family photos.
+- Confirm photo cards show whether each image is local-only, storage-ready, or waiting for production storage setup.
 - Connect transactional email for invites, contribution requests, and reminders.
 - Connect reminder scheduling for anniversary and after-service follow-up.
 - Connect payment provider for family and funeral-home plans.
@@ -84,7 +86,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for `/api/publish`.
 - Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.
 - Confirm invite batches can be queued through `/api/invites` or safely exported when delivery is not configured.
-- Confirm `/api/health` reports checkout, publish database, invite delivery, and support email integration state.
+- Confirm `/api/health` reports checkout, publish database, media storage, invite delivery, and support email integration state.
 - Connect checkout return handling, publish endpoint, and domain verification status.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.
