@@ -101,10 +101,18 @@ module.exports = async function handler(req, res) {
     if (stored === true) return sendJson(res, 200, { status: 'granted', reason: 'Server access verified' });
     if (stored === false) return sendJson(res, 403, { status: 'denied', reason: 'Access code does not match this memorial' });
 
-    return sendJson(res, 202, {
-      status: demoAccess(packet) ? 'granted' : 'denied',
+    if (demoAccess(packet)) {
+      return sendJson(res, 202, {
+        status: 'granted',
+        mode: 'demo-fallback',
+        message: 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to enforce access checks against stored memorial records.'
+      });
+    }
+
+    return sendJson(res, 403, {
+      status: 'denied',
       mode: 'demo-fallback',
-      message: 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to enforce access checks against stored memorial records.'
+      reason: 'Access code does not match this memorial'
     });
   } catch (error) {
     return sendJson(res, 502, {
