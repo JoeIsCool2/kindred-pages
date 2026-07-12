@@ -11,6 +11,7 @@ module.exports = async function handler(req, res) {
     integrations: {
       checkout: present('STRIPE_CHECKOUT_URL') || present('STRIPE_PAYMENT_LINK_BASE_URL'),
       publishDatabase: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),
+      accessControl: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),
       mediaStorage: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY') && present('MEDIA_BUCKET'),
       inviteDelivery: present('INVITE_WEBHOOK_URL') || (present('RESEND_API_KEY') && present('INVITE_FROM_EMAIL')),
       supportEmail: present('VITE_SUPPORT_EMAIL') || present('SUPPORT_EMAIL')

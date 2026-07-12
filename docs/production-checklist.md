@@ -24,7 +24,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm privacy defaults to invite-only or another family-safe mode.
 - Confirm gathering-type presets safely adjust service, privacy, schedule, livestream, and guest-care defaults without overwriting the family story.
 - Confirm guest-facing private access screens appear for invite-only and passcode pages before memorial content is shown.
-- Confirm passcodes, invite tokens, guest sharing, and search visibility are enforced server-side at publish time.
+- Confirm passcodes, invite tokens, guest sharing, and search visibility are enforced through `/api/access` and at publish time.
 - Confirm guest memories enter moderation before publishing.
 - Confirm guest memories can be approved or kept private, and that kept-private records remain visible to family admins only.
 - Confirm guest memories capture relationship context and review consent before submission.
@@ -74,6 +74,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 
 - Connect authentication for family admins and funeral-home partners.
 - Connect database tables from `docs/schema.sql`.
+- Confirm `/api/access` validates invite links and passcodes against stored memorial records before private pages render.
 - Connect Supabase draft persistence from `docs/storage-integration.md`.
 - Connect private object storage for photos, gallery captions, cover-photo choice, visibility settings, and archive exports.
 - Set `MEDIA_BUCKET` and confirm `/api/media` returns signed private upload targets for family photos.
@@ -86,7 +87,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for `/api/publish`.
 - Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.
 - Confirm invite batches can be queued through `/api/invites` or safely exported when delivery is not configured.
-- Confirm `/api/health` reports checkout, publish database, media storage, invite delivery, and support email integration state.
+- Confirm `/api/health` reports checkout, publish database, access control, media storage, invite delivery, and support email integration state.
 - Connect checkout return handling, publish endpoint, and domain verification status.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.

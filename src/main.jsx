@@ -1084,16 +1084,18 @@ function App() {
   const publishEndpoint = import.meta.env.VITE_PUBLISH_ENDPOINT || '/api/publish';
   const inviteEndpoint = import.meta.env.VITE_INVITE_ENDPOINT || '/api/invites';
   const mediaEndpoint = import.meta.env.VITE_MEDIA_ENDPOINT || '/api/media';
+  const accessEndpoint = import.meta.env.VITE_ACCESS_ENDPOINT || '/api/access';
   const integrationChecks = useMemo(() => ([
     { label: 'Cloud drafts', detail: import.meta.env.VITE_SUPABASE_URL ? 'Supabase URL set' : 'Needs Supabase URL', ready: Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY), icon: Archive },
     { label: 'Media storage', detail: mediaEndpoint ? 'Media endpoint set' : 'Needs media endpoint', ready: Boolean(mediaEndpoint), icon: Image },
+    { label: 'Access checks', detail: accessEndpoint ? 'Access endpoint set' : 'Needs access endpoint', ready: Boolean(accessEndpoint), icon: Lock },
     { label: 'Payments', detail: checkoutUrl ? 'Checkout URL set' : 'Needs checkout URL', ready: Boolean(checkoutUrl && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY), icon: CreditCard },
     { label: 'Publishing', detail: publishEndpoint ? 'Publish endpoint set' : 'Needs publish endpoint', ready: Boolean(publishEndpoint), icon: Rocket },
     { label: 'Invite delivery', detail: inviteEndpoint ? 'Invite endpoint set' : 'Needs invite endpoint', ready: Boolean(inviteEndpoint), icon: Send },
     { label: 'Support email', detail: import.meta.env.VITE_SUPPORT_EMAIL || 'Needs support email', ready: Boolean(import.meta.env.VITE_SUPPORT_EMAIL), icon: Mail },
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
-  ]), [checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
+  ]), [accessEndpoint, checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
 
   useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);
@@ -2635,7 +2637,7 @@ function App() {
             </div>
           </div>
           <div className={`preview ${previewMode}`} ref={printRef}>
-            <MemorialPage site={site} shareUrl={shareUrl} qrDataUrl={qrDataUrl} onGuestMemory={submitGuestMemory} onGuestRsvp={addRsvp} onSupportClaim={claimSupportNeed} onCalendar={downloadCalendar} />
+            <MemorialPage site={site} shareUrl={shareUrl} qrDataUrl={qrDataUrl} accessEndpoint={accessEndpoint} onGuestMemory={submitGuestMemory} onGuestRsvp={addRsvp} onSupportClaim={claimSupportNeed} onCalendar={downloadCalendar} />
           </div>
         </aside>
       </section>
@@ -2654,7 +2656,7 @@ function App() {
               </div>
             </div>
             <div className="public-preview-frame">
-              <MemorialPage site={site} shareUrl={shareUrl} qrDataUrl={qrDataUrl} onGuestMemory={submitGuestMemory} onGuestRsvp={addRsvp} onSupportClaim={claimSupportNeed} onCalendar={downloadCalendar} />
+              <MemorialPage site={site} shareUrl={shareUrl} qrDataUrl={qrDataUrl} accessEndpoint={accessEndpoint} onGuestMemory={submitGuestMemory} onGuestRsvp={addRsvp} onSupportClaim={claimSupportNeed} onCalendar={downloadCalendar} />
             </div>
           </section>
           <PreviewProof onStart={() => openStep('person')} onKeepsakes={() => openStep('keepsakes')} onTrust={() => navigate('/trust')} />
@@ -4767,15 +4769,15 @@ function QrImage({ src, label, small = false }) {
   return src ? <img className={small ? 'real-qr small-qr' : 'real-qr'} src={src} alt={label} /> : <div className={small ? 'fake-qr small-qr' : 'fake-qr'} aria-label={label}>QR</div>;
 }
 
-function GuestAccessGate({ site, privacyLabel, onUnlock }) {
+function GuestAccessGate({ site, privacyLabel, accessEndpoint, onUnlock }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [checking, setChecking] = useState(false);
   const expected = site.privacy === 'password' ? site.accessCode : site.inviteToken;
   const codeLabel = site.privacy === 'password' ? 'Family passcode' : 'Invitation code';
   const cover = coverPhoto(site);
 
-  const submit = () => {
-    const entered = code.trim();
+  const localUnlock = (entered) => {
     const normalizedEntered = site.privacy === 'password' ? entered : entered.toLowerCase();
     const normalizedExpected = site.privacy === 'password' ? expected : expected?.toLowerCase();
     if (normalizedEntered && normalizedEntered === normalizedExpected) {
@@ -4784,6 +4786,53 @@ function GuestAccessGate({ site, privacyLabel, onUnlock }) {
       return;
     }
     setError('That code does not match this family page.');
+  };
+
+  const submit = async () => {
+    const entered = code.trim();
+    if (!entered) {
+      setError('Enter the code from the family invitation.');
+      return;
+    }
+
+    if (!accessEndpoint) {
+      localUnlock(entered);
+      return;
+    }
+
+    setChecking(true);
+    setError('');
+    try {
+      const response = await fetch(accessEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: site.slug,
+          privacy: site.privacy,
+          code: entered,
+          accessCode: site.accessCode,
+          inviteToken: site.inviteToken
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.ok && result.status === 'granted') {
+        onUnlock();
+        return;
+      }
+      if (response.status === 202 && result.status === 'granted') {
+        onUnlock();
+        return;
+      }
+      if (response.status === 202 && result.status === 'configuration-needed') {
+        localUnlock(entered);
+        return;
+      }
+      setError(result.reason || result.message || 'That code does not match this family page.');
+    } catch {
+      localUnlock(entered);
+    } finally {
+      setChecking(false);
+    }
   };
 
   return (
@@ -4806,13 +4855,13 @@ function GuestAccessGate({ site, privacyLabel, onUnlock }) {
           <input value={code} onChange={(event) => setCode(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && submit()} />
         </label>
         {error && <em>{error}</em>}
-        <button className="primary" onClick={submit}><Shield size={16} /> View page</button>
+        <button className="primary" onClick={submit} disabled={checking}><Shield size={16} /> {checking ? 'Checking' : 'View page'}</button>
       </section>
     </article>
   );
 }
 
-function MemorialPage({ site, shareUrl, qrDataUrl, onGuestMemory, onGuestRsvp, onSupportClaim, onCalendar }) {
+function MemorialPage({ site, shareUrl, qrDataUrl, accessEndpoint, onGuestMemory, onGuestRsvp, onSupportClaim, onCalendar }) {
   const [guestName, setGuestName] = useState('');
   const [guestRelation, setGuestRelation] = useState('');
   const [guestMemory, setGuestMemory] = useState('');
@@ -4908,11 +4957,47 @@ function MemorialPage({ site, shareUrl, qrDataUrl, onGuestMemory, onGuestRsvp, o
 
   useEffect(() => {
     const invite = new URLSearchParams(window.location.search).get('invite');
-    setAccessUnlocked(Boolean(site.privacy === 'invite' && invite && invite === site.inviteToken));
-  }, [site.privacy, site.inviteToken, site.accessCode]);
+    if (site.privacy !== 'invite' || !invite) {
+      setAccessUnlocked(false);
+      return;
+    }
+
+    if (!accessEndpoint) {
+      setAccessUnlocked(invite === site.inviteToken);
+      return;
+    }
+
+    let cancelled = false;
+    fetch(accessEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug: site.slug,
+        privacy: site.privacy,
+        invite,
+        inviteToken: site.inviteToken
+      })
+    })
+      .then((response) => response.json().then((result) => ({ response, result })).catch(() => ({ response, result: {} })))
+      .then(({ response, result }) => {
+        if (cancelled) return;
+        setAccessUnlocked(
+          (response.ok && result.status === 'granted') ||
+          (response.status === 202 && result.status === 'granted') ||
+          invite === site.inviteToken
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setAccessUnlocked(invite === site.inviteToken);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessEndpoint, site.privacy, site.inviteToken, site.slug]);
 
   if (requiresAccess && !accessUnlocked) {
-    return <GuestAccessGate site={site} privacyLabel={privacyLabel} onUnlock={() => setAccessUnlocked(true)} />;
+    return <GuestAccessGate site={site} privacyLabel={privacyLabel} accessEndpoint={accessEndpoint} onUnlock={() => setAccessUnlocked(true)} />;
   }
 
   return (

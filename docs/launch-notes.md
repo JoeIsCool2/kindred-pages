@@ -19,6 +19,7 @@
 
 - Connect authentication.
 - Connect database tables for memorials, memories, RSVPs, co-admins, support links, and launch tasks.
+- Configure `/api/access` with Supabase server-side credentials for invite and passcode checks.
 - Connect photo/object storage.
 - Configure `/api/media` with Supabase storage credentials and a private media bucket.
 - Add transactional email templates.

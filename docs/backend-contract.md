@@ -6,9 +6,10 @@ This frontend is ready to connect to a hosted backend. The recommended first pro
 
 - `GET /api/checkout`: validates checkout query parameters and redirects to `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL` when configured.
 - `POST /api/publish`: validates the launch packet and upserts publish state into Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
+- `POST /api/access`: validates invite-link and passcode access attempts against stored memorial privacy records when Supabase service credentials are configured.
 - `POST /api/media`: validates photo upload metadata and creates private storage upload targets when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `MEDIA_BUCKET` are configured.
 - `POST /api/invites`: validates guest invite batches and sends them through `INVITE_WEBHOOK_URL` or Resend when `RESEND_API_KEY` and `INVITE_FROM_EMAIL` are configured.
-- `GET /api/health`: reports whether checkout, publish database, media storage, invite delivery, and support email integrations are configured.
+- `GET /api/health`: reports whether checkout, publish database, access control, media storage, invite delivery, and support email integrations are configured.
 
 ## Core Tables
 

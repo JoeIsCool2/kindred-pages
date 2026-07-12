@@ -24,6 +24,7 @@ const required = [
   ['VITE_PUBLISH_ENDPOINT', 'Publish endpoint for launch packets'],
   ['VITE_INVITE_ENDPOINT', 'Invite delivery endpoint for guest batches'],
   ['VITE_MEDIA_ENDPOINT', 'Media upload planning endpoint for photo storage'],
+  ['VITE_ACCESS_ENDPOINT', 'Access-check endpoint for invite and passcode pages'],
   ['VITE_SUPPORT_EMAIL', 'Reachable support email']
 ];
 
