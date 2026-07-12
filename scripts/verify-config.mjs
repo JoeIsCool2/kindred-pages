@@ -25,6 +25,7 @@ const required = [
   ['VITE_INVITE_ENDPOINT', 'Invite delivery endpoint for guest batches'],
   ['VITE_MEDIA_ENDPOINT', 'Media upload planning endpoint for photo storage'],
   ['VITE_ACCESS_ENDPOINT', 'Access-check endpoint for invite and passcode pages'],
+  ['VITE_AUTH_ENDPOINT', 'Admin authentication endpoint for family and partner sessions'],
   ['VITE_SUPPORT_EMAIL', 'Reachable support email']
 ];
 
@@ -36,6 +37,11 @@ const optional = [
   ['SUPABASE_URL', 'Server-side Supabase REST URL for publish endpoint'],
   ['SUPABASE_SERVICE_ROLE_KEY', 'Server-side Supabase service role key for publish endpoint'],
   ['MEDIA_BUCKET', 'Private object-storage bucket for family photos'],
+  ['AUTH_SECRET', 'Server-side auth signing secret'],
+  ['AUTH_DEMO_TOKEN', 'Demo auth token for local preview only'],
+  ['AUTH_WEBHOOK_URL', 'Server-side auth magic-link webhook'],
+  ['AUTH_WEBHOOK_SECRET', 'Optional auth webhook bearer secret'],
+  ['AUTH_FROM_EMAIL', 'Verified from-address for auth emails'],
   ['INVITE_WEBHOOK_URL', 'Server-side invite delivery webhook'],
   ['INVITE_WEBHOOK_SECRET', 'Optional invite webhook bearer secret'],
   ['RESEND_API_KEY', 'Server-side Resend key for invite email delivery'],

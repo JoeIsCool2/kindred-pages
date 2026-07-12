@@ -9,6 +9,7 @@ module.exports = async function handler(req, res) {
     app: 'Kindred Pages',
     status: 'ok',
     integrations: {
+      adminAuth: present('AUTH_SECRET') && (present('AUTH_WEBHOOK_URL') || (present('RESEND_API_KEY') && present('AUTH_FROM_EMAIL'))),
       checkout: present('STRIPE_CHECKOUT_URL') || present('STRIPE_PAYMENT_LINK_BASE_URL'),
       publishDatabase: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),
       accessControl: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),

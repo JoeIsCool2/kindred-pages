@@ -1085,7 +1085,9 @@ function App() {
   const inviteEndpoint = import.meta.env.VITE_INVITE_ENDPOINT || '/api/invites';
   const mediaEndpoint = import.meta.env.VITE_MEDIA_ENDPOINT || '/api/media';
   const accessEndpoint = import.meta.env.VITE_ACCESS_ENDPOINT || '/api/access';
+  const authEndpoint = import.meta.env.VITE_AUTH_ENDPOINT || '/api/auth';
   const integrationChecks = useMemo(() => ([
+    { label: 'Admin auth', detail: authEndpoint ? 'Auth endpoint set' : 'Needs auth endpoint', ready: Boolean(authEndpoint), icon: UserCheck },
     { label: 'Cloud drafts', detail: import.meta.env.VITE_SUPABASE_URL ? 'Supabase URL set' : 'Needs Supabase URL', ready: Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY), icon: Archive },
     { label: 'Media storage', detail: mediaEndpoint ? 'Media endpoint set' : 'Needs media endpoint', ready: Boolean(mediaEndpoint), icon: Image },
     { label: 'Access checks', detail: accessEndpoint ? 'Access endpoint set' : 'Needs access endpoint', ready: Boolean(accessEndpoint), icon: Lock },
@@ -1095,7 +1097,7 @@ function App() {
     { label: 'Support email', detail: import.meta.env.VITE_SUPPORT_EMAIL || 'Needs support email', ready: Boolean(import.meta.env.VITE_SUPPORT_EMAIL), icon: Mail },
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
-  ]), [accessEndpoint, checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
+  ]), [accessEndpoint, authEndpoint, checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
 
   useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);
@@ -1340,6 +1342,54 @@ function App() {
     await copyText(coadminInviteText(admin), `${admin.name || 'Helper'} invite`);
     updateList('coadmins', index, { status: 'Invite copied' });
     addActivity('Helper invite copied', `${admin.name || 'A family helper'} was prepared for a family handoff.`);
+  };
+
+  const requestAdminAccess = async (admin = site.coadmins[0]) => {
+    if (!admin?.email) {
+      setToast('Add a helper email first');
+      return;
+    }
+
+    const packet = {
+      action: 'request-link',
+      name: admin.name,
+      email: admin.email,
+      role: admin.role || 'Family admin',
+      slug: site.slug || 'memorial',
+      memorialName: site.name,
+      returnUrl: productionUrl,
+      supportEmail: site.contact
+    };
+
+    if (!authEndpoint) {
+      copyText(JSON.stringify(packet, null, 2), 'Admin sign-in packet');
+      return;
+    }
+
+    try {
+      const response = await fetch(authEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(packet)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.ok && result.status === 'sent') {
+        addActivity('Admin sign-in sent', `${admin.email} was sent a Kindred Pages sign-in link.`);
+        setToast('Sign-in link sent');
+        return;
+      }
+      if (response.status === 202 && result.status === 'configuration-needed') {
+        copyText(JSON.stringify(result.signInPacket || packet, null, 2), 'Admin sign-in packet');
+        addActivity('Admin auth setup needed', 'A sign-in packet was prepared while auth delivery credentials are missing.');
+        setToast('Auth endpoint needs setup');
+        return;
+      }
+      throw new Error('Auth endpoint rejected the request');
+    } catch {
+      copyText(JSON.stringify(packet, null, 2), 'Admin sign-in packet');
+      addActivity('Admin sign-in needs review', 'The admin sign-in packet was copied for manual setup.');
+      setToast('Admin sign-in packet copied');
+    }
   };
 
   const addServiceOrderItem = () => {
@@ -2625,7 +2675,7 @@ function App() {
         </aside>
 
         <section className="editor">
-        <Editor active={active} site={site} progress={progress} shareUrl={shareUrl} productionUrl={productionUrl} shareMetadata={shareMetadata} copyShareMetadata={copyShareMetadata} checkoutPacketText={checkoutPacketText} copyCheckoutPacket={copyCheckoutPacket} copyFamilyApprovalPacket={copyFamilyApprovalPacket} copyLaunchReadinessReport={copyLaunchReadinessReport} downloadLaunchReadinessReport={downloadLaunchReadinessReport} copyFamilyHandoffPacket={copyFamilyHandoffPacket} copyClosurePacket={copyClosurePacket} integrationChecks={integrationChecks} applyGatheringPreset={applyGatheringPreset} update={update} updateMessage={updateMessage} updateLivestreamPlan={updateLivestreamPlan} updateList={updateList} removeList={removeList} addMemory={addMemory} addMilestone={addMilestone} addScheduleItem={addScheduleItem} addCareContact={addCareContact} addDayOfTask={addDayOfTask} addGuestFaq={addGuestFaq} addCustomCare={addCustomCare} addSupportGift={addSupportGift} addSupportNeed={addSupportNeed} addAftercareReminder={addAftercareReminder} addAnniversaryCare={addAnniversaryCare} updateAnniversaryStatus={updateAnniversaryStatus} addThankYouRecipient={addThankYouRecipient} addCoadmin={addCoadmin} coadminInviteText={coadminInviteText} copyCoadminInvite={copyCoadminInvite} addServiceOrderItem={addServiceOrderItem} addProgramPerson={addProgramPerson} addServiceSelection={addServiceSelection} addGuestUpdate={addGuestUpdate} addObituaryPlacement={addObituaryPlacement} updateObituaryPlacementStatus={updateObituaryPlacementStatus} addClosureRequest={addClosureRequest} updatePartner={updatePartner} addPartnerDraft={addPartnerDraft} markHandoffReady={markHandoffReady} toggleAftercare={toggleAftercare} toggleThankYouSent={toggleThankYouSent} toggleDayOfTask={toggleDayOfTask} toggleGuestFollowUp={toggleGuestFollowUp} toggleGuestInvite={toggleGuestInvite} updateClosureRequestStatus={updateClosureRequestStatus} handlePhotos={handlePhotos} setCoverPhoto={setCoverPhoto} setSite={setSite} qrDataUrl={qrDataUrl} approveMemory={approveMemory} rejectMemory={rejectMemory} addRsvp={addRsvp} importGuestList={importGuestList} toggleTask={toggleTask} toggleAccessibilityCheck={toggleAccessibilityCheck} toggleApprovalCheck={toggleApprovalCheck} updateLaunchApproval={updateLaunchApproval} markLaunchApproved={markLaunchApproved} togglePrivacyReviewCheck={togglePrivacyReviewCheck} updatePrivacyReview={updatePrivacyReview} markPrivacyReviewed={markPrivacyReviewed} toggleSensitiveReviewCheck={toggleSensitiveReviewCheck} updateSensitiveReview={updateSensitiveReview} markSensitiveReviewed={markSensitiveReviewed} downloadCsv={downloadCsv} downloadCalendar={downloadCalendar} downloadProgram={downloadProgram} downloadMemoryBook={downloadMemoryBook} downloadQrCards={downloadQrCards} downloadGuestGuide={downloadGuestGuide} downloadDayOfPacket={downloadDayOfPacket} copyAftercarePacket={copyAftercarePacket} aftercarePacketText={aftercarePacketText} dayOfPacketText={dayOfPacketText} downloadJson={downloadJson} startCheckout={startCheckout} connectDomain={connectDomain} publishPage={publishPage} sendInvites={sendInvites} copyText={copyText} guestGuideText={guestGuideText} importArchive={importArchive} resetSample={resetSample} />
+        <Editor active={active} site={site} progress={progress} shareUrl={shareUrl} productionUrl={productionUrl} shareMetadata={shareMetadata} copyShareMetadata={copyShareMetadata} checkoutPacketText={checkoutPacketText} copyCheckoutPacket={copyCheckoutPacket} copyFamilyApprovalPacket={copyFamilyApprovalPacket} copyLaunchReadinessReport={copyLaunchReadinessReport} downloadLaunchReadinessReport={downloadLaunchReadinessReport} copyFamilyHandoffPacket={copyFamilyHandoffPacket} copyClosurePacket={copyClosurePacket} integrationChecks={integrationChecks} applyGatheringPreset={applyGatheringPreset} update={update} updateMessage={updateMessage} updateLivestreamPlan={updateLivestreamPlan} updateList={updateList} removeList={removeList} addMemory={addMemory} addMilestone={addMilestone} addScheduleItem={addScheduleItem} addCareContact={addCareContact} addDayOfTask={addDayOfTask} addGuestFaq={addGuestFaq} addCustomCare={addCustomCare} addSupportGift={addSupportGift} addSupportNeed={addSupportNeed} addAftercareReminder={addAftercareReminder} addAnniversaryCare={addAnniversaryCare} updateAnniversaryStatus={updateAnniversaryStatus} addThankYouRecipient={addThankYouRecipient} addCoadmin={addCoadmin} coadminInviteText={coadminInviteText} copyCoadminInvite={copyCoadminInvite} requestAdminAccess={requestAdminAccess} addServiceOrderItem={addServiceOrderItem} addProgramPerson={addProgramPerson} addServiceSelection={addServiceSelection} addGuestUpdate={addGuestUpdate} addObituaryPlacement={addObituaryPlacement} updateObituaryPlacementStatus={updateObituaryPlacementStatus} addClosureRequest={addClosureRequest} updatePartner={updatePartner} addPartnerDraft={addPartnerDraft} markHandoffReady={markHandoffReady} toggleAftercare={toggleAftercare} toggleThankYouSent={toggleThankYouSent} toggleDayOfTask={toggleDayOfTask} toggleGuestFollowUp={toggleGuestFollowUp} toggleGuestInvite={toggleGuestInvite} updateClosureRequestStatus={updateClosureRequestStatus} handlePhotos={handlePhotos} setCoverPhoto={setCoverPhoto} setSite={setSite} qrDataUrl={qrDataUrl} approveMemory={approveMemory} rejectMemory={rejectMemory} addRsvp={addRsvp} importGuestList={importGuestList} toggleTask={toggleTask} toggleAccessibilityCheck={toggleAccessibilityCheck} toggleApprovalCheck={toggleApprovalCheck} updateLaunchApproval={updateLaunchApproval} markLaunchApproved={markLaunchApproved} togglePrivacyReviewCheck={togglePrivacyReviewCheck} updatePrivacyReview={updatePrivacyReview} markPrivacyReviewed={markPrivacyReviewed} toggleSensitiveReviewCheck={toggleSensitiveReviewCheck} updateSensitiveReview={updateSensitiveReview} markSensitiveReviewed={markSensitiveReviewed} downloadCsv={downloadCsv} downloadCalendar={downloadCalendar} downloadProgram={downloadProgram} downloadMemoryBook={downloadMemoryBook} downloadQrCards={downloadQrCards} downloadGuestGuide={downloadGuestGuide} downloadDayOfPacket={downloadDayOfPacket} copyAftercarePacket={copyAftercarePacket} aftercarePacketText={aftercarePacketText} dayOfPacketText={dayOfPacketText} downloadJson={downloadJson} startCheckout={startCheckout} connectDomain={connectDomain} publishPage={publishPage} sendInvites={sendInvites} copyText={copyText} guestGuideText={guestGuideText} importArchive={importArchive} resetSample={resetSample} />
         </section>
 
         <aside className="preview-wrap">
@@ -3309,7 +3359,7 @@ function BuilderStartGuide({ site, progress }) {
   );
 }
 
-function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata, copyShareMetadata, checkoutPacketText, copyCheckoutPacket, copyFamilyApprovalPacket, copyLaunchReadinessReport, downloadLaunchReadinessReport, copyFamilyHandoffPacket, copyClosurePacket, integrationChecks, applyGatheringPreset, update, updateMessage, updateLivestreamPlan, updateList, removeList, addMemory, addMilestone, addScheduleItem, addCareContact, addDayOfTask, addGuestFaq, addCustomCare, addSupportGift, addSupportNeed, addAftercareReminder, addAnniversaryCare, updateAnniversaryStatus, addThankYouRecipient, addCoadmin, copyCoadminInvite, addServiceOrderItem, addProgramPerson, addServiceSelection, addGuestUpdate, addObituaryPlacement, updateObituaryPlacementStatus, addClosureRequest, updatePartner, addPartnerDraft, markHandoffReady, toggleAftercare, toggleThankYouSent, toggleDayOfTask, toggleGuestFollowUp, toggleGuestInvite, updateClosureRequestStatus, handlePhotos, setCoverPhoto, setSite, qrDataUrl, approveMemory, rejectMemory, addRsvp, importGuestList, toggleTask, toggleAccessibilityCheck, toggleApprovalCheck, updateLaunchApproval, markLaunchApproved, togglePrivacyReviewCheck, updatePrivacyReview, markPrivacyReviewed, toggleSensitiveReviewCheck, updateSensitiveReview, markSensitiveReviewed, downloadCsv, downloadCalendar, downloadProgram, downloadMemoryBook, downloadQrCards, downloadGuestGuide, downloadDayOfPacket, copyAftercarePacket, aftercarePacketText, dayOfPacketText, downloadJson, startCheckout, connectDomain, publishPage, sendInvites, copyText, guestGuideText, importArchive, resetSample }) {
+function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata, copyShareMetadata, checkoutPacketText, copyCheckoutPacket, copyFamilyApprovalPacket, copyLaunchReadinessReport, downloadLaunchReadinessReport, copyFamilyHandoffPacket, copyClosurePacket, integrationChecks, applyGatheringPreset, update, updateMessage, updateLivestreamPlan, updateList, removeList, addMemory, addMilestone, addScheduleItem, addCareContact, addDayOfTask, addGuestFaq, addCustomCare, addSupportGift, addSupportNeed, addAftercareReminder, addAnniversaryCare, updateAnniversaryStatus, addThankYouRecipient, addCoadmin, copyCoadminInvite, requestAdminAccess, addServiceOrderItem, addProgramPerson, addServiceSelection, addGuestUpdate, addObituaryPlacement, updateObituaryPlacementStatus, addClosureRequest, updatePartner, addPartnerDraft, markHandoffReady, toggleAftercare, toggleThankYouSent, toggleDayOfTask, toggleGuestFollowUp, toggleGuestInvite, updateClosureRequestStatus, handlePhotos, setCoverPhoto, setSite, qrDataUrl, approveMemory, rejectMemory, addRsvp, importGuestList, toggleTask, toggleAccessibilityCheck, toggleApprovalCheck, updateLaunchApproval, markLaunchApproved, togglePrivacyReviewCheck, updatePrivacyReview, markPrivacyReviewed, toggleSensitiveReviewCheck, updateSensitiveReview, markSensitiveReviewed, downloadCsv, downloadCalendar, downloadProgram, downloadMemoryBook, downloadQrCards, downloadGuestGuide, downloadDayOfPacket, copyAftercarePacket, aftercarePacketText, dayOfPacketText, downloadJson, startCheckout, connectDomain, publishPage, sendInvites, copyText, guestGuideText, importArchive, resetSample }) {
   const [guestImportText, setGuestImportText] = useState('');
 
   const privateInviteUrl = `${shareUrl}?invite=${site.inviteToken || 'family'}`;
@@ -4353,6 +4403,31 @@ function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata
         <div className="action-row">
           <button className="primary" onClick={markLaunchApproved}><Check size={17} /> Mark approved</button>
           <button className="secondary" onClick={copyFamilyApprovalPacket}><Download size={17} /> Copy approval packet</button>
+        </div>
+      </div>
+      <div className="admin-access-panel">
+        <div className="section-line">
+          <h3>Admin Access</h3>
+          <span>{site.coadmins.filter((admin) => admin.email).length} helper sign-in target{site.coadmins.filter((admin) => admin.email).length === 1 ? '' : 's'}</span>
+        </div>
+        <div className="admin-access-summary">
+          <UserCheck size={20} />
+          <div>
+            <strong>Prepare secure editing access for the family owner</strong>
+            <p>Send or copy a sign-in packet for the owner, helper, or funeral-home coordinator once production auth delivery is connected.</p>
+          </div>
+        </div>
+        <div className="admin-access-grid">
+          {site.coadmins.map((admin, index) => (
+            <article key={`${admin.email}-${index}`}>
+              <div>
+                <strong>{admin.name}</strong>
+                <span>{admin.role} · {admin.status || 'Active'}</span>
+              </div>
+              <small>{admin.email}</small>
+              <button className="secondary" onClick={() => requestAdminAccess(admin)}><UserCheck size={16} /> Sign-in link</button>
+            </article>
+          ))}
         </div>
       </div>
       <div className="integration-panel">

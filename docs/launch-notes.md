@@ -18,6 +18,7 @@
 ## Launch Checklist
 
 - Connect authentication.
+- Configure `/api/auth` with admin sign-in delivery credentials.
 - Connect database tables for memorials, memories, RSVPs, co-admins, support links, and launch tasks.
 - Configure `/api/access` with Supabase server-side credentials for invite and passcode checks.
 - Connect photo/object storage.
