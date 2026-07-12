@@ -29,6 +29,7 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 - Access controls for family passcodes, invite tokens, search visibility, and guest sharing
 - Guest-facing private access screen for invite-only and passcode memorials
 - Launch command center for checkout, domain setup, publishing, and invite preparation
+- Five-step launch path for review, payment, publishing, invites, and preservation
 - Family launch approval packet with reviewer sign-off before publishing
 - Checkout summary and copyable checkout packet with package price, billing mode, included items, contact, and return URL
 - Share preview and copyable metadata packet for search, social cards, canonical URL, and robots settings

@@ -652,6 +652,42 @@ function getLaunchSnapshot(site) {
   });
 }
 
+function getLaunchPath(site, progress) {
+  const reviewsDone = progress === 100 && privacyReviewComplete(site) && sensitiveReviewComplete(site) && approvalComplete(site);
+  const paid = site.checkoutStatus === 'Paid';
+  const published = site.launchStatus === 'Published';
+  const invitesReady = site.inviteStatus?.includes('Queued') || (site.rsvp?.length && site.rsvp.every((guest) => guest.inviteSent));
+  const archived = site.archiveStatus === 'Exported';
+
+  return [
+    {
+      title: 'Review',
+      detail: 'Readiness, privacy, sensitive details, and family approval are confirmed before launch.',
+      status: reviewsDone ? 'Done' : 'Now'
+    },
+    {
+      title: 'Pay',
+      detail: `${site.plan} plan, checkout packet, billing mode, and return link stay attached to the launch record.`,
+      status: paid ? 'Done' : reviewsDone ? 'Next' : 'Waiting'
+    },
+    {
+      title: 'Publish',
+      detail: 'The page moves from draft to the family share link only after checks and approval are recorded.',
+      status: published ? 'Done' : paid && reviewsDone ? 'Next' : 'Waiting'
+    },
+    {
+      title: 'Invite',
+      detail: 'Guest messages, private link, RSVP list, and follow-up notes are prepared for family outreach.',
+      status: invitesReady ? 'Done' : published ? 'Next' : 'Waiting'
+    },
+    {
+      title: 'Preserve',
+      detail: 'Archive, keepsakes, memories, and closure records remain available after the gathering.',
+      status: archived ? 'Done' : published ? 'Next' : 'Waiting'
+    }
+  ];
+}
+
 function privacyReviewComplete(site) {
   return Boolean(
     site.privacyReview?.reviewer &&
@@ -3751,6 +3787,7 @@ function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata
   const metadata = shareMetadata();
   const selectedPlan = getPlanDetails(site.plan);
   const launchSnapshot = getLaunchSnapshot(site);
+  const launchPath = getLaunchPath(site, progress);
   const launchIssues = getLaunchIssues(site, progress);
 
   return (
@@ -3777,6 +3814,18 @@ function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata
           <button className="secondary" onClick={connectDomain}><Globe2 size={17} /> Domain setup</button>
           <button className="secondary" onClick={sendInvites}><Send size={17} /> Prepare invites</button>
           <button className="secondary" onClick={() => copyText(JSON.stringify({ shareUrl, productionUrl, site }, null, 2), 'Launch packet')}><Download size={17} /> Copy launch packet</button>
+        </div>
+        <div className="launch-path" aria-label="Review, Pay, Publish, Invite, and Preserve launch path">
+          {launchPath.map((item, index) => (
+            <article className={`launch-path-step ${item.status.toLowerCase()}`} key={item.title}>
+              <span>{item.status === 'Done' ? <Check size={15} /> : index + 1}</span>
+              <div>
+                <strong>{item.title}</strong>
+                <em>{item.status}</em>
+                <p>{item.detail}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
 
