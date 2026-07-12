@@ -2678,6 +2678,17 @@ function PartnerMarketingPage({ site, onStart, onPricing }) {
     ['A sellable digital add-on', 'The partner plan supports recurring family drafts, co-branding, package status, and simple handoff around existing service work.'],
     ['Respectful boundaries', 'Moderation, family ownership, noindex defaults, and scoped co-admin access keep the funeral home helpful without taking over.']
   ];
+  const valueStack = [
+    ['Package fit', site.partner.defaultPackage, 'Offer as an add-on to celebration-of-life, livestream, print, or aftercare packages.'],
+    ['Staff workflow', 'Draft, coordinate, export', 'One desk covers family drafts, RSVP notes, QR cards, service packets, and handoff status.'],
+    ['Family handoff', site.partner.handoffStatus, 'The family receives owner notes, helper roles, archive status, privacy choices, and next actions.']
+  ];
+  const artifacts = [
+    ['Family draft', 'Service details, obituary copy, privacy defaults, gathering type, and page tone are ready before the family edits.'],
+    ['Service-day packet', 'Coordinator brief, guest needs, livestream backup, QR cards, programs, and support needs are exportable.'],
+    ['Handoff record', 'Partner access, ownership notes, archive status, approvals, and remaining tasks are preserved for the family.'],
+    ['Package reporting', 'Draft stage, package name, family owner, billing mode, and handoff status stay visible across cases.']
+  ];
 
   return (
     <section id="page-content" className="page-section partner-page">
@@ -2735,6 +2746,38 @@ function PartnerMarketingPage({ site, onStart, onPricing }) {
             <p>{text}</p>
           </article>
         ))}
+      </section>
+      <section className="partner-value-stack">
+        <div className="page-head compact">
+          <p className="eyebrow"><CreditCard size={16} /> Partner value stack</p>
+          <h2>Built to become a repeatable service package, not another staff tool.</h2>
+        </div>
+        <div className="partner-value-grid">
+          {valueStack.map(([label, value, text]) => (
+            <article key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="partner-artifacts">
+        <div className="section-line">
+          <h3>What the care team can hand off</h3>
+          <span>{artifacts.length} artifacts</span>
+        </div>
+        <div className="partner-artifact-grid">
+          {artifacts.map(([title, text], index) => (
+            <article key={title}>
+              <span>{index + 1}</span>
+              <div>
+                <strong>{title}</strong>
+                <p>{text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </section>
   );

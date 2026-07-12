@@ -705,6 +705,80 @@ a:focus-visible {
   display: block;
   margin: 12px 0 7px;
 }
+.partner-value-stack,
+.partner-artifacts {
+  display: grid;
+  gap: 18px;
+}
+.partner-value-grid,
+.partner-artifact-grid {
+  display: grid;
+  gap: 14px;
+}
+.partner-value-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.partner-value-grid article,
+.partner-artifact-grid article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 253, 248, 0.84)),
+    #fff;
+  box-shadow: 0 12px 36px rgba(35, 46, 42, 0.06);
+}
+.partner-value-grid article {
+  padding: 22px;
+}
+.partner-value-grid span {
+  display: block;
+  margin-bottom: 10px;
+  color: #557867;
+  font-size: 0.78rem;
+  font-weight: 860;
+  text-transform: uppercase;
+}
+.partner-value-grid strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 1.55rem;
+  line-height: 1.08;
+}
+.partner-value-grid p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.partner-artifact-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.partner-artifact-grid article {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 12px;
+  min-height: 136px;
+  padding: 18px;
+}
+.partner-artifact-grid article > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #fff;
+  background: #557867;
+  font-weight: 860;
+}
+.partner-artifact-grid strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: Georgia, serif;
+  font-size: 1.22rem;
+}
+.partner-artifact-grid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
 .safeguard-grid,
 .research-grid {
   display: grid;
@@ -4446,7 +4520,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .hero h1 { font-size: clamp(3rem, 13vw, 4.8rem); }
   .hero-panel, .hero-panel img { min-height: 360px; }
-  .trust-strip, .plans, .pricing, .pricing-hero, .pricing-decision-grid, .pricing-fit-grid, .pricing-faq, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .audience-grid, .workflow-grid, .safeguard-grid, .research-grid, .templates-hero, .template-choice-grid, .template-research, .preview-proof-head, .guest-job-grid, .partner-landing, .partner-page-grid, .partner-flow, .partner-outcomes, .preview-page, .compact-cards { grid-template-columns: 1fr; }
+  .trust-strip, .plans, .pricing, .pricing-hero, .pricing-decision-grid, .pricing-fit-grid, .pricing-faq, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .audience-grid, .workflow-grid, .safeguard-grid, .research-grid, .templates-hero, .template-choice-grid, .template-research, .preview-proof-head, .guest-job-grid, .partner-landing, .partner-page-grid, .partner-flow, .partner-outcomes, .partner-value-grid, .partner-artifact-grid, .preview-page, .compact-cards { grid-template-columns: 1fr; }
   .page-section { padding-left: 16px; padding-right: 16px; }
   .page-head.compact { text-align: left; }
   .public-preview-frame { max-height: none; }
