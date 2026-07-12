@@ -1082,14 +1082,16 @@ function App() {
   const productionUrl = import.meta.env.VITE_APP_URL || window.location.origin || 'https://kindred.page';
   const checkoutUrl = import.meta.env.VITE_STRIPE_CHECKOUT_URL || '/api/checkout';
   const publishEndpoint = import.meta.env.VITE_PUBLISH_ENDPOINT || '/api/publish';
+  const inviteEndpoint = import.meta.env.VITE_INVITE_ENDPOINT || '/api/invites';
   const integrationChecks = useMemo(() => ([
     { label: 'Cloud drafts', detail: import.meta.env.VITE_SUPABASE_URL ? 'Supabase URL set' : 'Needs Supabase URL', ready: Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY), icon: Archive },
     { label: 'Payments', detail: checkoutUrl ? 'Checkout URL set' : 'Needs checkout URL', ready: Boolean(checkoutUrl && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY), icon: CreditCard },
     { label: 'Publishing', detail: publishEndpoint ? 'Publish endpoint set' : 'Needs publish endpoint', ready: Boolean(publishEndpoint), icon: Rocket },
+    { label: 'Invite delivery', detail: inviteEndpoint ? 'Invite endpoint set' : 'Needs invite endpoint', ready: Boolean(inviteEndpoint), icon: Send },
     { label: 'Support email', detail: import.meta.env.VITE_SUPPORT_EMAIL || 'Needs support email', ready: Boolean(import.meta.env.VITE_SUPPORT_EMAIL), icon: Mail },
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
-  ]), [checkoutUrl, publishEndpoint, productionUrl]);
+  ]), [checkoutUrl, inviteEndpoint, publishEndpoint, productionUrl]);
 
   useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);
@@ -2372,16 +2374,97 @@ function App() {
     setToast('Page published locally');
   };
 
-  const sendInvites = () => {
-    const recipients = site.rsvp.map((guest) => `${guest.name}${guest.email ? ` <${guest.email}>` : ''}${guest.phone ? ` ${guest.phone}` : ''}${guest.group ? ` [${guest.group}]` : ''}`).join('\n');
+  const invitePayload = () => ({
+    slug: site.slug || 'memorial',
+    memorialName: site.name,
+    subject: site.messages.emailSubject || `Remembering ${site.name}`,
+    message: site.messages.invite,
+    memoryRequest: site.messages.memoryRequest,
+    shareUrl,
+    privateInviteUrl: `${shareUrl}?invite=${site.inviteToken || 'family'}`,
+    replyTo: site.contact,
+    privacy: site.privacy,
+    service: {
+      title: site.serviceTitle,
+      date: site.serviceDate,
+      time: site.serviceTime,
+      place: site.servicePlace,
+      address: site.serviceAddress,
+      livestream: site.livestream
+    },
+    recipients: site.rsvp.map((guest) => ({
+      name: guest.name,
+      email: guest.email || '',
+      phone: guest.phone || '',
+      group: guest.group || '',
+      attending: guest.attending || 'Not sure',
+      partySize: guest.partySize || '1',
+      needs: guest.needs || '',
+      note: guest.note || ''
+    }))
+  });
+
+  const inviteBatchText = (packet = invitePayload()) => [
+    `${packet.subject}`,
+    '',
+    `${packet.message} ${packet.privateInviteUrl}`,
+    '',
+    packet.memoryRequest ? `${packet.memoryRequest} ${packet.privateInviteUrl}` : '',
+    '',
+    'Guest contacts',
+    ...packet.recipients.map((guest) => `${guest.name}${guest.email ? ` <${guest.email}>` : ''}${guest.phone ? ` ${guest.phone}` : ''}${guest.group ? ` [${guest.group}]` : ''}`)
+  ].filter(Boolean).join('\n');
+
+  const markInvitesQueued = (status) => {
     setSite((current) => ({
       ...current,
-      inviteStatus: `Queued for ${current.rsvp.length} guests`,
+      inviteStatus: status,
       rsvp: current.rsvp.map((guest) => ({ ...guest, inviteSent: true }))
     }));
-    update('inviteStatus', `Queued for ${site.rsvp.length} guests`);
-    addActivity('Invites prepared', `${site.rsvp.length} guest invite${site.rsvp.length === 1 ? '' : 's'} queued for sharing.`);
-    copyText(`${site.messages.invite} ${shareUrl}\n\nGuest contacts:\n${recipients}`, 'Invite batch');
+  };
+
+  const sendInvites = async () => {
+    if (!site.rsvp.length) {
+      setToast('Add guests before preparing invites');
+      return;
+    }
+
+    const packet = invitePayload();
+    update('inviteStatus', 'Preparing invites');
+    addActivity('Invites prepared', `${packet.recipients.length} guest invite${packet.recipients.length === 1 ? '' : 's'} prepared for delivery.`);
+
+    if (inviteEndpoint) {
+      try {
+        const response = await fetch(inviteEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(packet)
+        });
+        if (!response.ok) throw new Error('Invite endpoint rejected the batch');
+        const result = await response.json().catch(() => ({}));
+        if (result.status === 'configuration-needed') {
+          update('inviteStatus', 'Needs integration');
+          downloadTextFile(`${site.slug || 'kindred'}-invite-packet.json`, JSON.stringify(packet, null, 2), 'application/json');
+          copyText(inviteBatchText(packet), 'Invite batch');
+          addActivity('Invite integration needed', 'The invite endpoint is live but still needs email or webhook credentials.');
+          setToast('Invite endpoint needs setup');
+          return;
+        }
+        markInvitesQueued(`Queued for ${packet.recipients.length} guests`);
+        addActivity('Invites queued', `${packet.recipients.length} guest invite${packet.recipients.length === 1 ? '' : 's'} queued through the invite endpoint.`);
+        setToast('Invites queued');
+      } catch {
+        update('inviteStatus', 'Needs review');
+        downloadTextFile(`${site.slug || 'kindred'}-invite-packet.json`, JSON.stringify(packet, null, 2), 'application/json');
+        copyText(inviteBatchText(packet), 'Invite batch');
+        addActivity('Invite batch needs review', 'The invite packet was downloaded and copied for manual sending.');
+        setToast('Invite packet downloaded');
+      }
+      return;
+    }
+
+    markInvitesQueued(`Queued for ${packet.recipients.length} guests`);
+    copyText(inviteBatchText(packet), 'Invite batch');
   };
 
   return (

@@ -82,7 +82,9 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Set `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL` for `/api/checkout`.
 - Connect checkout packet fields to the payment provider and fulfillment workflow.
 - Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for `/api/publish`.
-- Confirm `/api/health` reports checkout, publish database, and support email integration state.
+- Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.
+- Confirm invite batches can be queued through `/api/invites` or safely exported when delivery is not configured.
+- Confirm `/api/health` reports checkout, publish database, invite delivery, and support email integration state.
 - Connect checkout return handling, publish endpoint, and domain verification status.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.
