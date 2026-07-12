@@ -22,8 +22,10 @@
 - Connect photo/object storage.
 - Add transactional email templates.
 - Add Stripe or another payment provider.
+- Configure `/api/checkout` with a Stripe Checkout URL or payment link base.
+- Configure `/api/publish` with Supabase server-side credentials.
+- Check `/api/health` before announcing the site to paying families.
 - Add abuse reporting and moderation logs.
 - Add production analytics focused on completion and drop-off, not invasive guest tracking.
 - Verify accessibility with keyboard navigation and screen reader labels.
 - Verify printed QR cards and service programs.
-

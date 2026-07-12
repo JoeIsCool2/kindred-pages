@@ -124,6 +124,8 @@ Public trust pages are served from `/privacy.html`, `/terms.html`, and `/securit
 
 The app experience is split into focused pages: `/` explains the product, `/builder` creates the memorial, `/preview` shows the guest-facing page, `/pricing` presents plans, `/partners` supports funeral-home buyers, and `/trust` explains privacy, moderation, archive, and research-backed product decisions.
 
+Vercel Functions are included for `/api/checkout`, `/api/publish`, and `/api/health`. They provide production integration targets for checkout redirection, launch-packet publishing, and integration health checks. Without server secrets they return configuration-needed responses instead of marking the backend complete.
+
 ## Deployment
 
 This app can deploy to any static host that supports single-page apps, including Vercel, Netlify, Cloudflare Pages, or S3/CloudFront.
@@ -141,7 +143,7 @@ Required production services for a real launch:
 - Open Graph, canonical URL, share image, and robots metadata publishing
 - Moderation and activity logging for guest submissions, exports, helper invites, and launch actions
 
-The current frontend is launch-shaped and production-buildable, but it uses local browser storage as its data layer until those services are connected.
+The current frontend is launch-shaped and production-buildable, with Vercel Function scaffolds for checkout and publish. It still uses local browser storage as its data layer until hosted services and server secrets are connected.
 
 See [docs/backend-contract.md](docs/backend-contract.md) and [docs/schema.sql](docs/schema.sql) for the production data model and API contract.
 Use [docs/storage-integration.md](docs/storage-integration.md) when connecting cloud draft persistence.

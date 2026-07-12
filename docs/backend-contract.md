@@ -2,6 +2,12 @@
 
 This frontend is ready to connect to a hosted backend. The recommended first production stack is Supabase, object storage, Stripe, and a transactional email provider.
 
+## Included Vercel Function Targets
+
+- `GET /api/checkout`: validates checkout query parameters and redirects to `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL` when configured.
+- `POST /api/publish`: validates the launch packet and upserts publish state into Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
+- `GET /api/health`: reports whether checkout, publish database, and support email integrations are configured.
+
 ## Core Tables
 
 ### memorials

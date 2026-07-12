@@ -78,7 +78,10 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Connect transactional email for invites, contribution requests, and reminders.
 - Connect reminder scheduling for anniversary and after-service follow-up.
 - Connect payment provider for family and funeral-home plans.
+- Set `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL` for `/api/checkout`.
 - Connect checkout packet fields to the payment provider and fulfillment workflow.
+- Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for `/api/publish`.
+- Confirm `/api/health` reports checkout, publish database, and support email integration state.
 - Connect checkout return handling, publish endpoint, and domain verification status.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.

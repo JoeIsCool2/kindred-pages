@@ -1080,8 +1080,8 @@ function App() {
     setToast(`${preset.label} setup applied`);
   };
   const productionUrl = import.meta.env.VITE_APP_URL || window.location.origin || 'https://kindred.page';
-  const checkoutUrl = import.meta.env.VITE_STRIPE_CHECKOUT_URL || '';
-  const publishEndpoint = import.meta.env.VITE_PUBLISH_ENDPOINT || '';
+  const checkoutUrl = import.meta.env.VITE_STRIPE_CHECKOUT_URL || '/api/checkout';
+  const publishEndpoint = import.meta.env.VITE_PUBLISH_ENDPOINT || '/api/publish';
   const integrationChecks = useMemo(() => ([
     { label: 'Cloud drafts', detail: import.meta.env.VITE_SUPABASE_URL ? 'Supabase URL set' : 'Needs Supabase URL', ready: Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY), icon: Archive },
     { label: 'Payments', detail: checkoutUrl ? 'Checkout URL set' : 'Needs checkout URL', ready: Boolean(checkoutUrl && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY), icon: CreditCard },
@@ -2268,11 +2268,20 @@ function App() {
     addActivity('Publish started', 'The launch packet was prepared for publishing.');
     if (publishEndpoint) {
       try {
-        await fetch(publishEndpoint, {
+        const response = await fetch(publishEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+        if (!response.ok) throw new Error('Publish endpoint rejected the launch packet');
+        const result = await response.json().catch(() => ({}));
+        if (result.status === 'configuration-needed') {
+          update('launchStatus', 'Needs integration');
+          downloadTextFile(`${site.slug || 'kindred'}-publish-payload.json`, JSON.stringify(payload, null, 2), 'application/json');
+          addActivity('Publish integration needed', 'The publish endpoint is live but still needs production Supabase secrets.');
+          setToast('Publish endpoint needs setup');
+          return;
+        }
         update('launchStatus', 'Published');
         addActivity('Page published', `${site.name}'s memorial was published.`);
         setToast('Page published');
