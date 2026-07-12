@@ -2829,6 +2829,7 @@ function PricingGuidance() {
 
   return (
     <>
+      <PricingDecisionGuide />
       <div className="pricing-fit-grid">
         {fit.map(([title, text]) => (
           <article key={title}>
@@ -2862,6 +2863,51 @@ function PricingGuidance() {
         ))}
       </section>
     </>
+  );
+}
+
+function PricingDecisionGuide() {
+  const decisionRows = [
+    ['Need the link today?', 'Family Page', 'Fast private page, RSVP, QR code, memories, and service details for one gathering.'],
+    ['Need keepsakes and aftercare?', 'Legacy Archive', 'Adds program, memory book, archive manifest, aftercare packet, and anniversary prompts.'],
+    ['Serve many families?', 'Funeral Home', 'Adds co-branded drafts, scoped helpers, package status, exports, and family handoff tools.']
+  ];
+  const afterPay = [
+    ['Checkout packet', 'Plan, price, billing mode, contact, slug, privacy mode, and return URL stay attached to launch.'],
+    ['Launch review', 'Family approval, privacy, sensitive details, share preview, and accessibility checks remain visible.'],
+    ['Handoff and archive', 'Invites, QR cards, service exports, memory moderation, and archive records are ready for the next step.']
+  ];
+
+  return (
+    <section className="pricing-decision">
+      <div className="page-head compact">
+        <p className="eyebrow"><CreditCard size={16} /> Choose without a sales call</p>
+        <h2>Pick by the job the family needs done.</h2>
+      </div>
+      <div className="pricing-decision-grid">
+        <div className="decision-table">
+          {decisionRows.map(([need, plan, detail]) => (
+            <article key={need}>
+              <span>{need}</span>
+              <strong>{plan}</strong>
+              <p>{detail}</p>
+            </article>
+          ))}
+        </div>
+        <div className="after-pay-card">
+          <strong>What happens after payment</strong>
+          {afterPay.map(([title, text], index) => (
+            <article key={title}>
+              <span>{index + 1}</span>
+              <div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -4819,9 +4865,13 @@ function Pricing() {
     <div className="pricing">
       {planCatalog.map((plan) => (
         <article key={plan.name}>
+          <span>{plan.billing}</span>
           <h3>{plan.name}</h3>
           <strong>{plan.price}</strong>
           <p>{plan.bestFor}. Includes {plan.includes.slice(0, 3).join(', ')}.</p>
+          <ul>
+            {plan.includes.map((item) => <li key={item}><Check size={14} /> {item}</li>)}
+          </ul>
         </article>
       ))}
     </div>

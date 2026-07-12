@@ -26,6 +26,7 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 - Gentle story-starter prompts for families who do not know where to begin
 - Live public-page preview
 - Preview proof section that maps guest tasks to family outcomes and service-day artifacts
+- Pricing decision guide that maps buyer needs to the right plan and explains what happens after payment
 - Privacy modes
 - Access controls for family passcodes, invite tokens, search visibility, and guest sharing
 - Guest-facing private access screen for invite-only and passcode memorials

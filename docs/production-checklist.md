@@ -10,6 +10,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm `/templates` lets a family choose a situation-specific starting point and applies the matching service, privacy, livestream, guest-care, and archive defaults.
 - Confirm `/preview` shows guest tasks, family outcomes, service-day artifacts, and clear next actions beyond the visual page preview.
 - Confirm `/pricing` helps families and funeral homes choose a plan with fit guidance, concrete outcomes, privacy reassurance, and partner handoff value.
+- Confirm `/pricing` explains which plan fits urgent service sharing, legacy preservation, and funeral-home partner work, plus what happens after payment.
 - Confirm `/partners` explains the funeral-home workflow from intake to coordination to family handoff, including service-day exports, scoped access, and repeatable partner value.
 - Confirm `/trust` explains privacy safeguards, moderation, archive control, and research-backed product decisions without requiring families to read dense research.
 - Confirm direct builder-section links open the right step, including `#settings`, `#desk`, and `#keepsakes`.
