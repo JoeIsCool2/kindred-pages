@@ -24,6 +24,7 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 - Builder first-three-decisions guide that keeps families focused on setup, identity, and launch control
 - Launch Snapshot that groups readiness into Story, Guest Care, Sharing, and Preservation
 - Launch Issues panel that surfaces unresolved reviews, pending memories, unsent invites, open support needs, obituary status, archive, and closure items
+- Copyable and downloadable Launch Readiness Report with public visibility, private review, guest-care, payment, archive, and next-action summary
 - Gentle story-starter prompts for families who do not know where to begin
 - Live public-page preview
 - Preview proof section that maps guest tasks to family outcomes and service-day artifacts

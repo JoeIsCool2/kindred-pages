@@ -19,6 +19,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm the builder first-three-decisions guide keeps the first step focused on situation, identity, and launch control.
 - Confirm Launch Snapshot clearly groups readiness into Story, Guest Care, Sharing, and Preservation.
 - Confirm Launch Issues panel surfaces unresolved reviews, pending memories, unsent invites, open support needs, obituary status, archive, and closure items before publishing.
+- Confirm Launch Readiness Report can be copied and downloaded with readiness, next action, public visibility, private reviews, guest-care gaps, payment, archive, and launch checklist status.
 - Confirm local autosave, cloud draft loading, and cloud save fallback preserve a family's work.
 - Confirm privacy defaults to invite-only or another family-safe mode.
 - Confirm gathering-type presets safely adjust service, privacy, schedule, livestream, and guest-care defaults without overwriting the family story.
