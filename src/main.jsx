@@ -2402,20 +2402,23 @@ function App() {
       )}
 
       {route === '/preview' && (
-        <section id="page-content" className="preview-page">
-          <div className="page-head">
-            <p className="eyebrow"><Eye size={16} /> Family-facing page</p>
-            <h1>A clean memorial page guests can understand immediately.</h1>
-            <p>Guests see service details, RSVP, support options, livestream information, and a gentle memory form without needing to learn the builder.</p>
-            <div className="hero-actions">
-              <button className="primary" onClick={() => openStep('service')}>Edit details <ChevronRight size={18} /></button>
-              <button className="secondary" onClick={copyLink}><Globe2 size={18} /> Copy share link</button>
+        <>
+          <section id="page-content" className="preview-page page-section">
+            <div className="page-head">
+              <p className="eyebrow"><Eye size={16} /> Family-facing page</p>
+              <h1>A clean memorial page guests can understand immediately.</h1>
+              <p>Guests see service details, RSVP, support options, livestream information, and a gentle memory form without needing to learn the builder.</p>
+              <div className="hero-actions">
+                <button className="primary" onClick={() => openStep('service')}>Edit details <ChevronRight size={18} /></button>
+                <button className="secondary" onClick={copyLink}><Globe2 size={18} /> Copy share link</button>
+              </div>
             </div>
-          </div>
-          <div className="public-preview-frame">
-            <MemorialPage site={site} shareUrl={shareUrl} qrDataUrl={qrDataUrl} onGuestMemory={submitGuestMemory} onGuestRsvp={addRsvp} onSupportClaim={claimSupportNeed} onCalendar={downloadCalendar} />
-          </div>
-        </section>
+            <div className="public-preview-frame">
+              <MemorialPage site={site} shareUrl={shareUrl} qrDataUrl={qrDataUrl} onGuestMemory={submitGuestMemory} onGuestRsvp={addRsvp} onSupportClaim={claimSupportNeed} onCalendar={downloadCalendar} />
+            </div>
+          </section>
+          <PreviewProof onStart={() => openStep('person')} onKeepsakes={() => openStep('keepsakes')} onTrust={() => navigate('/trust')} />
+        </>
       )}
 
       {route === '/pricing' && (
@@ -2590,6 +2593,70 @@ function TemplatesPage({ onApply, onPreview, onTrust }) {
         <p>Kindred Pages uses situation-specific defaults because bereavement work mixes emotional story work with urgent coordination. The template only sets the first draft: families can still edit every word, privacy choice, schedule item, and keepsake before launch.</p>
         <button className="secondary" onClick={onTrust}><Shield size={17} /> Review trust model</button>
       </section>
+    </section>
+  );
+}
+
+function PreviewProof({ onStart, onKeepsakes, onTrust }) {
+  const guestJobs = [
+    ['Arrive prepared', 'Date, time, place, parking, accessibility, dress notes, children, reception, livestream, and replay details sit together.'],
+    ['Respond without friction', 'Guests can RSVP, share needs, add party size, download the calendar file, and copy service details.'],
+    ['Support the family', 'Donation links, meal trains, volunteer needs, flowers, rides, and setup help are visible without a separate phone tree.']
+  ];
+  const familyOutcomes = [
+    { icon: MessageCircle, title: 'Memories arrive gently', text: 'Stories, photos, and voice-note prompts go to family moderation before anything appears publicly.' },
+    { icon: Printer, title: 'The gathering has artifacts', text: 'QR cards, programs, guest guides, day-of packets, coordinator briefs, and memory books are ready to export.' },
+    { icon: Archive, title: 'Nothing disappears afterward', text: 'Approved memories, private moderation records, guest lists, care notes, and closure requests can be preserved.' }
+  ];
+  const proofStats = [
+    ['Public tasks', 'RSVP, livestream, support, memory'],
+    ['Family controls', 'Privacy, moderation, approval'],
+    ['Exports', 'Program, QR cards, archive']
+  ];
+
+  return (
+    <section className="page-section preview-proof">
+      <div className="preview-proof-head">
+        <div className="page-head">
+          <p className="eyebrow"><Check size={16} /> What this preview proves</p>
+          <h2>It is not just a pretty page. It replaces the scattered work around the service.</h2>
+          <p>Families pay when the page reduces repeated questions, helps guests show up well, and preserves the archive afterward.</p>
+        </div>
+        <div className="preview-proof-stats">
+          {proofStats.map(([label, value]) => (
+            <article key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div className="guest-job-grid">
+        {guestJobs.map(([title, text], index) => (
+          <article key={title}>
+            <span>{index + 1}</span>
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="workflow-grid preview-outcomes">
+        {familyOutcomes.map(({ icon: Icon, title, text }) => (
+          <article key={title}>
+            <Icon size={22} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="preview-proof-actions">
+        <button className="primary" onClick={onStart}>Build this page <ChevronRight size={18} /></button>
+        <button className="secondary" onClick={onKeepsakes}><Printer size={18} /> See exports</button>
+        <button className="secondary" onClick={onTrust}><Shield size={18} /> Review safeguards</button>
+      </div>
     </section>
   );
 }

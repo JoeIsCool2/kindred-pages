@@ -25,6 +25,7 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 - Launch Issues panel that surfaces unresolved reviews, pending memories, unsent invites, open support needs, obituary status, archive, and closure items
 - Gentle story-starter prompts for families who do not know where to begin
 - Live public-page preview
+- Preview proof section that maps guest tasks to family outcomes and service-day artifacts
 - Privacy modes
 - Access controls for family passcodes, invite tokens, search visibility, and guest sharing
 - Guest-facing private access screen for invite-only and passcode memorials

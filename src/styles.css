@@ -527,6 +527,87 @@ a:focus-visible {
   overflow: auto;
   padding: 12px;
 }
+.preview-proof {
+  display: grid;
+  gap: 18px;
+  padding-top: 8px;
+}
+.preview-proof-head {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.62fr) minmax(320px, 0.38fr);
+  gap: clamp(18px, 4vw, 38px);
+  align-items: start;
+}
+.preview-proof-stats {
+  display: grid;
+  gap: 12px;
+}
+.preview-proof-stats article,
+.guest-job-grid article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 253, 248, 0.86)),
+    #fff;
+  box-shadow: 0 12px 36px rgba(35, 46, 42, 0.06);
+}
+.preview-proof-stats article {
+  padding: 18px;
+}
+.preview-proof-stats span {
+  display: block;
+  margin-bottom: 7px;
+  color: #557867;
+  font-size: 0.78rem;
+  font-weight: 860;
+  text-transform: uppercase;
+}
+.preview-proof-stats strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 1.45rem;
+  line-height: 1.08;
+}
+.guest-job-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.guest-job-grid article {
+  display: grid;
+  align-content: start;
+  min-height: 210px;
+  padding: 22px;
+}
+.guest-job-grid span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #fff;
+  background: #557867;
+  font-weight: 860;
+}
+.guest-job-grid h3 {
+  margin: 14px 0 8px;
+  font-family: Georgia, serif;
+  font-size: 1.34rem;
+}
+.guest-job-grid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.preview-outcomes {
+  margin-top: 2px;
+}
+.preview-proof-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 4px;
+}
 .partner-page-grid {
   grid-template-columns: minmax(280px, 0.9fr) minmax(340px, 1.1fr);
   margin-bottom: 18px;
@@ -4261,7 +4342,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .hero h1 { font-size: clamp(3rem, 13vw, 4.8rem); }
   .hero-panel, .hero-panel img { min-height: 360px; }
-  .trust-strip, .plans, .pricing, .pricing-hero, .pricing-fit-grid, .pricing-faq, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .audience-grid, .workflow-grid, .safeguard-grid, .research-grid, .templates-hero, .template-choice-grid, .template-research, .partner-landing, .partner-page-grid, .partner-flow, .partner-outcomes, .preview-page, .compact-cards { grid-template-columns: 1fr; }
+  .trust-strip, .plans, .pricing, .pricing-hero, .pricing-fit-grid, .pricing-faq, .trust-center, .trust-matrix, .onboarding-head, .path-grid, .audience-grid, .workflow-grid, .safeguard-grid, .research-grid, .templates-hero, .template-choice-grid, .template-research, .preview-proof-head, .guest-job-grid, .partner-landing, .partner-page-grid, .partner-flow, .partner-outcomes, .preview-page, .compact-cards { grid-template-columns: 1fr; }
   .page-section { padding-left: 16px; padding-right: 16px; }
   .page-head.compact { text-align: left; }
   .public-preview-frame { max-height: none; }
