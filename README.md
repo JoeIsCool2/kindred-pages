@@ -20,6 +20,7 @@ The product is designed around a sensitive workflow: create a beautiful memorial
 - Direct builder-section links for Person, Story, Service, Guest Care, Memories, Family Desk, Partner Desk, Announcements, Keepsakes, and Settings
 - Section readiness markers in the builder navigation so families can see what needs attention
 - Family Launch Guide that points admins to the next essential action
+- Builder first-three-decisions guide that keeps families focused on setup, identity, and launch control
 - Launch Snapshot that groups readiness into Story, Guest Care, Sharing, and Preservation
 - Launch Issues panel that surfaces unresolved reviews, pending memories, unsent invites, open support needs, obituary status, archive, and closure items
 - Gentle story-starter prompts for families who do not know where to begin

@@ -13,6 +13,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm `/trust` explains privacy safeguards, moderation, archive control, and research-backed product decisions without requiring families to read dense research.
 - Confirm direct builder-section links open the right step, including `#settings`, `#desk`, and `#keepsakes`.
 - Confirm builder navigation readiness markers accurately show which sections are ready or need attention.
+- Confirm the builder first-three-decisions guide keeps the first step focused on situation, identity, and launch control.
 - Confirm Launch Snapshot clearly groups readiness into Story, Guest Care, Sharing, and Preservation.
 - Confirm Launch Issues panel surfaces unresolved reviews, pending memories, unsent invites, open support needs, obituary status, archive, and closure items before publishing.
 - Confirm local autosave, cloud draft loading, and cloud save fallback preserve a family's work.

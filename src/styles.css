@@ -835,6 +835,69 @@ a:focus-visible {
 .grid { display: grid; gap: 14px; }
 .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+.builder-start-guide {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(248, 251, 247, 0.94), rgba(255, 253, 248, 0.88)),
+    #fff;
+}
+.builder-start-guide h3 {
+  margin: 6px 0 0;
+  font-family: Georgia, serif;
+  font-size: 1.6rem;
+  line-height: 1.04;
+}
+.builder-start-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.builder-start-steps article {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 7px 9px;
+  min-height: 138px;
+  padding: 12px;
+  border: 1px solid #e3ddd2;
+  border-radius: 8px;
+  background: #fff;
+}
+.builder-start-steps article > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+  background: #557867;
+  font-size: 0.78rem;
+  font-weight: 860;
+}
+.builder-start-steps svg {
+  color: #557867;
+  align-self: center;
+}
+.builder-start-steps strong,
+.builder-start-steps p {
+  grid-column: 1 / -1;
+}
+.builder-start-steps strong {
+  font-family: Georgia, serif;
+  font-size: 1.08rem;
+  line-height: 1.12;
+}
+.builder-start-steps p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.42;
+}
+
 .field { display: block; margin-bottom: 14px; }
 .field span {
   display: block;
@@ -4111,7 +4174,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
 .template-chapel { --sage: #766b8c; }
 
 @media (max-width: 1320px) {
-  .builder-shell { grid-template-columns: 190px 1fr; }
+  .builder-shell { grid-template-columns: 220px 1fr; }
   .preview-wrap { grid-column: 1 / -1; position: static; max-height: none; }
   .preview .memorial { max-width: 720px; margin: 0 auto; }
 }
@@ -4130,7 +4193,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   .builder-shell { grid-template-columns: 1fr; }
   .rail { position: static; display: grid; grid-template-columns: 1fr; }
   .nav-step { display: inline-flex; width: auto; margin: 0 5px 7px 0; }
-  .grid.two, .tone-grid, .privacy-grid, .keepsake-grid, .template-grid, .preset-grid, .stat-grid, .partner-stats, .desk-split, .ops-grid, .message-grid, .announcement-grid, .guest-update-list, .guest-faq-editor, .custom-care-list, .public-faq-list, .public-custom-care-list, .readiness-head, .check-grid, .launch-issue, .care-summary, .contact-list, .support-editor, .support-need-list, .anniversary-list, .public-care-grid, .public-support-grid, .public-update-list, .obituary-placement-list, .launch-status-grid, .snapshot-grid, .integration-grid, .approval-checks, .privacy-review-grid, .privacy-review-checks, .sensitive-review-grid, .sensitive-review-checks, .coordinator-brief-grid, .brief-list article, .handoff-grid, .accessibility-checks, .plan-picker, .launch-actions, .story-prompt-grid, .helper-grid, .meta-grid { grid-template-columns: 1fr; }
+  .grid.two, .tone-grid, .privacy-grid, .keepsake-grid, .template-grid, .preset-grid, .builder-start-steps, .stat-grid, .partner-stats, .desk-split, .ops-grid, .message-grid, .announcement-grid, .guest-update-list, .guest-faq-editor, .custom-care-list, .public-faq-list, .public-custom-care-list, .readiness-head, .check-grid, .launch-issue, .care-summary, .contact-list, .support-editor, .support-need-list, .anniversary-list, .public-care-grid, .public-support-grid, .public-update-list, .obituary-placement-list, .launch-status-grid, .snapshot-grid, .integration-grid, .approval-checks, .privacy-review-grid, .privacy-review-checks, .sensitive-review-grid, .sensitive-review-checks, .coordinator-brief-grid, .brief-list article, .handoff-grid, .accessibility-checks, .plan-picker, .launch-actions, .story-prompt-grid, .helper-grid, .meta-grid { grid-template-columns: 1fr; }
   .review-card { align-items: flex-start; flex-direction: column; }
   .review-actions { justify-content: flex-start; min-width: 0; width: 100%; }
   .launch-hero { align-items: stretch; flex-direction: column; }

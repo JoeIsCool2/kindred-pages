@@ -2833,6 +2833,48 @@ function FamilyLaunchGuide({ actions, onSelect }) {
   );
 }
 
+function BuilderStartGuide({ site, progress }) {
+  const decisions = [
+    {
+      icon: Sparkles,
+      label: '1',
+      title: 'Choose the closest situation',
+      text: `${site.gatheringType || 'A guided template'} sets privacy, schedule, guest-care, and wording defaults.`
+    },
+    {
+      icon: FileHeart,
+      label: '2',
+      title: 'Name the person clearly',
+      text: site.name ? `${site.name} is the anchor for the page, keepsakes, invites, and archive.` : 'The name, dates, and relationship line make the page feel real quickly.'
+    },
+    {
+      icon: Shield,
+      label: '3',
+      title: 'Keep launch control visible',
+      text: `${progress}% ready now. Privacy and approval checks stay in the workflow before sharing widely.`
+    }
+  ];
+
+  return (
+    <section className="builder-start-guide" aria-label="Builder first steps">
+      <div>
+        <p className="eyebrow"><Check size={16} /> First three decisions</p>
+        <h3>Start simple. The rest can wait.</h3>
+      </div>
+      <div className="builder-start-steps">
+        {decisions.map(({ icon: Icon, label, title, text }) => (
+          <article key={title}>
+            <span>{label}</span>
+            <Icon size={18} />
+            <strong>{title}</strong>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata, copyShareMetadata, checkoutPacketText, copyCheckoutPacket, copyFamilyApprovalPacket, copyFamilyHandoffPacket, copyClosurePacket, integrationChecks, applyGatheringPreset, update, updateMessage, updateLivestreamPlan, updateList, removeList, addMemory, addMilestone, addScheduleItem, addCareContact, addDayOfTask, addGuestFaq, addCustomCare, addSupportGift, addSupportNeed, addAftercareReminder, addAnniversaryCare, updateAnniversaryStatus, addThankYouRecipient, addCoadmin, copyCoadminInvite, addServiceOrderItem, addProgramPerson, addServiceSelection, addGuestUpdate, addObituaryPlacement, updateObituaryPlacementStatus, addClosureRequest, updatePartner, addPartnerDraft, markHandoffReady, toggleAftercare, toggleThankYouSent, toggleDayOfTask, toggleGuestFollowUp, toggleGuestInvite, updateClosureRequestStatus, handlePhotos, setCoverPhoto, setSite, qrDataUrl, approveMemory, rejectMemory, addRsvp, importGuestList, toggleTask, toggleAccessibilityCheck, toggleApprovalCheck, updateLaunchApproval, markLaunchApproved, togglePrivacyReviewCheck, updatePrivacyReview, markPrivacyReviewed, toggleSensitiveReviewCheck, updateSensitiveReview, markSensitiveReviewed, downloadCsv, downloadCalendar, downloadProgram, downloadMemoryBook, downloadQrCards, downloadGuestGuide, downloadDayOfPacket, copyAftercarePacket, aftercarePacketText, dayOfPacketText, downloadJson, startCheckout, connectDomain, publishPage, sendInvites, copyText, guestGuideText, importArchive, resetSample }) {
   const [guestImportText, setGuestImportText] = useState('');
 
@@ -2903,6 +2945,7 @@ function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata
   if (active === 'person') {
     return (
       <Panel title="The Person" intro="Start with the details families expect to see first.">
+        <BuilderStartGuide site={site} progress={progress} />
         <div className="setup-presets">
           <div className="section-line">
             <h3>Guided Setup</h3>
