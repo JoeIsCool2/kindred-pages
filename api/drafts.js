@@ -166,15 +166,48 @@ async function insertArchiveExport(memorial, packet) {
   return row;
 }
 
-async function recordActivity(memorial, actor, detail) {
+async function insertDomainCheck(memorial, packet) {
+  const site = packet.site || {};
+  const domain = String(packet.domain || site.customDomain || '').trim().toLowerCase();
+  const canonicalUrl = domain ? `https://${domain}` : packet.canonicalUrl || site.canonicalUrl || null;
+  const verificationToken = domain ? `kindred-${site.slug || memorial.slug}` : null;
+  const status = domain ? 'DNS instructions recorded' : 'Use Kindred subdomain';
+  const detail = domain
+    ? `Add CNAME cname.kindred.page and TXT ${verificationToken} before publishing this custom domain.`
+    : 'No custom domain was provided; the Kindred subdomain remains the launch target.';
+
+  const response = await fetch(`${baseUrl()}/rest/v1/domain_checks`, {
+    method: 'POST',
+    headers: supabaseHeaders('return=representation'),
+    body: JSON.stringify({
+      memorial_id: memorial.id,
+      domain: domain || `${site.slug || memorial.slug}.kindred.page`,
+      status,
+      canonical_url: canonicalUrl,
+      verification_token: verificationToken,
+      detail,
+      checked_at: new Date().toISOString()
+    })
+  });
+
+  if (!response.ok) {
+    const detailText = await response.text();
+    throw new Error(`Domain check insert failed: ${detailText}`);
+  }
+
+  const [row] = await response.json();
+  return row;
+}
+
+async function recordActivity(memorial, actor, action, detail) {
   const response = await fetch(`${baseUrl()}/rest/v1/activity_log`, {
     method: 'POST',
     headers: supabaseHeaders('return=minimal'),
     body: JSON.stringify({
       memorial_id: memorial.id,
-      actor: actor || 'Family admin',
-      action: 'Archive exported',
-      detail: detail || 'A family archive export was recorded.'
+      actor_name: actor || 'Family admin',
+      action,
+      detail
     })
   });
 
@@ -215,12 +248,39 @@ module.exports = async function handler(req, res) {
 
       const memorial = await saveDraft({ ...site, archiveStatus: 'Exported' });
       const archive = await insertArchiveExport(memorial, packet);
-      await recordActivity(memorial, packet.exportedBy || site.contact, `Archive export recorded with ${packet.manifest?.included?.length || 0} included categories.`).catch(() => undefined);
+      await recordActivity(memorial, packet.exportedBy || site.contact, 'Archive exported', `Archive export recorded with ${packet.manifest?.included?.length || 0} included categories.`).catch(() => undefined);
       return sendJson(res, 200, {
         status: 'archive-recorded',
         slug: site.slug,
         archiveExportId: archive.id,
         exportedAt: archive.exported_at
+      });
+    }
+
+    if (packet.action === 'domain-check') {
+      const site = packet.site || {};
+      if (!site.slug) return sendJson(res, 422, { error: 'Domain check packet needs a site slug' });
+
+      const domain = String(packet.domain || site.customDomain || '').trim().toLowerCase();
+      const nextStatus = domain ? 'DNS instructions recorded' : 'Use Kindred subdomain';
+      const canonicalUrl = domain ? `https://${domain}` : packet.canonicalUrl || site.canonicalUrl || null;
+      const memorial = await saveDraft({
+        ...site,
+        customDomain: domain || '',
+        canonicalUrl,
+        domainStatus: nextStatus,
+        publishTarget: domain ? domain : site.publishTarget
+      });
+      const domainCheck = await insertDomainCheck(memorial, { ...packet, site: { ...site, customDomain: domain } });
+      await recordActivity(memorial, site.contact, 'Domain instructions prepared', `${domainCheck.domain} domain setup instructions were recorded.`).catch(() => undefined);
+      return sendJson(res, 200, {
+        status: 'domain-recorded',
+        slug: site.slug,
+        domain: domainCheck.domain,
+        domainStatus: domainCheck.status,
+        canonicalUrl: domainCheck.canonical_url,
+        verificationToken: domainCheck.verification_token,
+        checkedAt: domainCheck.checked_at
       });
     }
 

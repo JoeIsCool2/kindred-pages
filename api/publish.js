@@ -103,6 +103,7 @@ async function saveToSupabase(packet) {
     checkout_payload: sanitizeAccessPayload(packet),
     launch_status: 'Published',
     checkout_status: 'Paid',
+    domain_status: packet.domainStatus || (packet.customDomain ? 'DNS instructions recorded' : 'Use Kindred subdomain'),
     invite_status: packet.inviteStatus || 'Not sent',
     publish_target: packet.publishTarget || packet.shareUrl || packet.productionUrl || null,
     search_title: metadata.title || null,

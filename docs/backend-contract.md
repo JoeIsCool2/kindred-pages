@@ -11,7 +11,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `POST /api/auth`: prepares or sends family-admin and partner sign-in links through `AUTH_WEBHOOK_URL` or Resend when auth credentials are configured.
 - `POST /api/audit`: appends family-admin and partner activity events to `activity_log` when Supabase service credentials are configured.
 - `GET /api/drafts`: loads `memorials.draft_payload` by slug when Supabase service credentials are configured.
-- `POST /api/drafts`: upserts protected family draft state into `memorials` through server-side Supabase credentials; with `action=archive-export`, records a durable archive export row and activity log entry.
+- `POST /api/drafts`: upserts protected family draft state into `memorials` through server-side Supabase credentials; with `action=archive-export`, records a durable archive export row and activity log entry; with `action=domain-check`, records custom-domain instructions, canonical URL, verification token, and family activity.
 - `POST /api/memories`: stores guest memories in `memories` with `Pending` moderation status and optionally notifies the family through Resend.
 - `PATCH /api/memories`: approves or rejects a pending guest memory, preserves `approved_at`, `rejected_at`, and `review_note`, and appends a moderation entry to `activity_log`.
 - `POST /api/rsvps`: stores guest RSVP details in `rsvps` and optionally notifies the family through Resend.
@@ -359,6 +359,18 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `exported_at`
 - `created_at`
 
+### domain_checks
+
+- `id`
+- `memorial_id`
+- `domain`
+- `status`
+- `canonical_url`
+- `verification_token`
+- `detail`
+- `checked_at`
+- `created_at`
+
 ## Required API Operations
 
 - Hash passcodes with a salted verifier before storing `access_code_hash`; set `ACCESS_HASH_SECRET` as a server-only pepper for production.
@@ -394,12 +406,14 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - Export memorial archive.
 - Export archive manifest with counts, retention plan, closure status, and included records.
 - Persist archive export records in `archive_exports` with the manifest, archive payload, exported-by value, and exported timestamp.
+- Persist custom-domain setup records in `domain_checks` with domain, canonical URL, TXT verification token, setup status, and checked timestamp.
 - Export guest list CSV.
 - Export guest guide.
 - Export or copy aftercare packet with thank-you wording, archive status, reminders, and helpful contacts.
 - Create checkout session.
 - Create checkout packet with selected plan, price, billing mode, included items, contact, slug, privacy mode, and return URL.
 - Persist checkout, domain, publish, and invite status.
+- Persist domain status at publish time so a custom-domain launch cannot silently discard its verification state.
 - Persist search title, search description, share image, canonical URL, robots directive, publish target, checkout status, invite status, and approval reviewer fields at publish time.
 - Publish page from a launch packet.
 - Publish Open Graph, canonical URL, share image, and robots metadata from the launch packet.

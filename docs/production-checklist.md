@@ -107,6 +107,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm `/api/health` reports configured, connected, and launch-blocking state for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, and support email integration state.
 - Treat the site as not launch-ready unless `/api/health` proves Supabase tables are reachable, the private media bucket exists, Stripe plan prices can be read, Resend delivery is reachable, and required webhook URLs are valid HTTPS URLs.
 - Connect checkout return handling, publish endpoint, and domain verification status.
+- Confirm `/api/drafts` records custom-domain setup in `domain_checks` with canonical URL, TXT verification token, setup status, and checked timestamp.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.
 - Connect append-only audit logs for moderation, co-admin, export, publish, checkout, domain, and invite actions.
@@ -121,6 +122,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm invite-only, password, and hidden pages publish `noindex,nofollow`, while public pages may publish `index,follow`.
 - Confirm archive export is available before page closure.
 - Confirm archive exports are recorded in `archive_exports` through `/api/drafts` with manifest, payload, exporter, and timestamp.
+- Confirm custom-domain launch setup is recorded in `domain_checks` before a paid page relies on a family-owned domain.
 - Confirm closure and data requests can be logged, statused, copied, and included in archive records.
 - Confirm archive manifest includes counts, retention plan, closure status, kept-private moderation records, and all included record categories.
 - Confirm archive manifest includes aftercare packet wording and reminder status.

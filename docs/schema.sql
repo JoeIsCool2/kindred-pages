@@ -336,6 +336,18 @@ create table archive_exports (
   created_at timestamptz not null default now()
 );
 
+create table domain_checks (
+  id uuid primary key default gen_random_uuid(),
+  memorial_id uuid not null references memorials(id) on delete cascade,
+  domain text not null,
+  status text not null default 'DNS instructions recorded',
+  canonical_url text,
+  verification_token text,
+  detail text,
+  checked_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+
 create index memories_memorial_id_idx on memories(memorial_id);
 create index memorial_members_memorial_id_idx on memorial_members(memorial_id);
 create index memorial_members_user_id_idx on memorial_members(user_id);
@@ -363,6 +375,8 @@ create index obituary_placements_memorial_id_idx on obituary_placements(memorial
 create index activity_log_memorial_id_idx on activity_log(memorial_id);
 create index launch_tasks_memorial_id_idx on launch_tasks(memorial_id);
 create index archive_exports_memorial_id_idx on archive_exports(memorial_id);
+create index domain_checks_memorial_id_idx on domain_checks(memorial_id);
+create index domain_checks_domain_idx on domain_checks(domain);
 
 alter table memorials enable row level security;
 alter table memorial_members enable row level security;
@@ -388,6 +402,7 @@ alter table service_selections enable row level security;
 alter table activity_log enable row level security;
 alter table launch_tasks enable row level security;
 alter table archive_exports enable row level security;
+alter table domain_checks enable row level security;
 
 create or replace function current_user_can_manage_memorial(target_memorial_id uuid)
 returns boolean
@@ -573,3 +588,6 @@ create policy "members manage launch tasks"
 
 create policy "members manage archive exports"
   on archive_exports for all using (current_user_can_manage_memorial(memorial_id)) with check (current_user_can_manage_memorial(memorial_id));
+
+create policy "members manage domain checks"
+  on domain_checks for all using (current_user_can_manage_memorial(memorial_id)) with check (current_user_can_manage_memorial(memorial_id));

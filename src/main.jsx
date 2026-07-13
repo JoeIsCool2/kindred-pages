@@ -2406,6 +2406,7 @@ function App() {
     checkoutStatus: site.checkoutStatus,
     inviteStatus: site.inviteStatus,
     publishTarget: site.publishTarget,
+    domainStatus: site.domainStatus,
     shareMetadata: shareMetadata(),
     shareUrl,
     productionUrl,
@@ -2664,19 +2665,55 @@ function App() {
     setToast('Checkout needs setup');
   };
 
-  const connectDomain = () => {
-    const nextStatus = site.customDomain ? 'DNS instructions ready' : 'Use Kindred subdomain';
+  const connectDomain = async () => {
+    const domain = site.customDomain?.trim();
+    const nextStatus = domain ? 'DNS instructions ready' : 'Use Kindred subdomain';
+    const canonicalUrl = domain ? `https://${domain}` : shareUrl;
     update('domainStatus', nextStatus);
-    addActivity('Domain instructions prepared', `${site.customDomain || `${site.slug}.kindred.page`} setup details were copied.`);
+    update('canonicalUrl', canonicalUrl);
+    addActivity('Domain instructions prepared', `${domain || `${site.slug}.kindred.page`} setup details were copied.`);
     copyText(
       [
-        `Domain: ${site.customDomain || `${site.slug}.kindred.page`}`,
+        `Domain: ${domain || `${site.slug}.kindred.page`}`,
         'CNAME: cname.kindred.page',
-        'TXT verification: kindred-site-verification',
+        `TXT verification: kindred-${site.slug || 'memorial'}`,
         `Fallback link: ${shareUrl}`
       ].join('\n'),
       'Domain instructions'
     );
+    if (draftEndpoint) {
+      try {
+        const response = await fetch(draftEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'domain-check',
+            domain,
+            canonicalUrl,
+            site: {
+              ...site,
+              customDomain: domain || '',
+              canonicalUrl,
+              domainStatus: nextStatus,
+              publishTarget: domain || site.publishTarget
+            }
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.status === 'domain-recorded') {
+          update('domainStatus', result.domainStatus || 'DNS instructions recorded');
+          addActivity('Domain setup recorded', `${result.domain} setup status was saved for launch.`);
+          setToast('Domain setup recorded');
+          return;
+        }
+        if (result.status === 'configuration-needed') {
+          addActivity('Domain setup needs storage', 'Domain instructions were copied while server domain records need Supabase setup.');
+        }
+      } catch {
+        addActivity('Domain setup stayed local', 'Domain instructions were copied, but the server domain record could not be saved.');
+      }
+    }
+    setToast('Domain instructions ready');
   };
 
   const publishPage = async () => {
