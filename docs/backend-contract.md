@@ -2,6 +2,8 @@
 
 This frontend is ready to connect to a hosted backend. The recommended first production stack is Supabase, object storage, Stripe, and a transactional email provider.
 
+Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser clients should use Supabase Auth plus the RLS policies in `docs/schema.sql`; they should not receive service-role credentials.
+
 ## Included Vercel Function Targets
 
 - `GET /api/checkout`: validates checkout query parameters and redirects to `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL` when configured.
@@ -89,6 +91,15 @@ This frontend is ready to connect to a hosted backend. The recommended first pro
 - `created_at`
 - `updated_at`
 
+### memorial_members
+
+- `id`
+- `memorial_id`
+- `user_id`
+- `email`
+- `role`
+- `created_at`
+
 ### memories
 
 - `id`
@@ -155,6 +166,15 @@ This frontend is ready to connect to a hosted backend. The recommended first pro
 - `logo_initials`
 - `default_package`
 - `billing_mode`
+- `created_at`
+
+### partner_account_members
+
+- `id`
+- `partner_id`
+- `user_id`
+- `email`
+- `role`
 - `created_at`
 
 ### partner_drafts
@@ -293,6 +313,8 @@ This frontend is ready to connect to a hosted backend. The recommended first pro
 - Require `inviteToken` for invite-only publishing and `accessCode` for passcode publishing.
 - Store guest memories, RSVPs, and support claims server-side before relying on them for a paid family launch.
 - Keep guest memory status at `Pending` until a family moderator approves it.
+- Enable row-level security for all memorial, guest, partner, archive, support, and activity tables before adding browser-side Supabase access.
+- Seed `memorial_members` and `partner_account_members` when creating owners, helpers, and funeral-home coordinators.
 
 - Create memorial draft.
 - Update memorial draft.

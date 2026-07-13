@@ -80,6 +80,8 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm `/api/audit` appends local activity events to `activity_log` with Supabase service credentials.
 - Confirm `/api/drafts` loads and saves `memorials.draft_payload` through server-side Supabase credentials.
 - Connect database tables from `docs/schema.sql`.
+- Enable Supabase RLS policies from `docs/schema.sql` and confirm cross-memorial reads/writes are denied for family admins, helpers, partners, and guests.
+- Confirm `memorial_members` and `partner_account_members` are seeded when owner, helper, or partner access is created.
 - Confirm `/api/access` validates invite links and passcodes against stored memorial records before private pages render.
 - Connect Supabase draft persistence from `docs/storage-integration.md`.
 - Connect private object storage for photos, gallery captions, cover-photo choice, visibility settings, and archive exports.

@@ -24,6 +24,7 @@
 - Configure `/api/memories`, `/api/rsvps`, and `/api/support-claims` with Supabase service credentials for durable guest workflows.
 - Configure `GUEST_NOTIFICATION_FROM_EMAIL` if guest submissions should notify the family by email.
 - Connect database tables for memorials, memories, RSVPs, co-admins, support links, and launch tasks.
+- Enable Supabase RLS from `docs/schema.sql` and seed `memorial_members` / `partner_account_members` for owners, helpers, and partner coordinators.
 - Configure `/api/access` with Supabase server-side credentials for invite and passcode checks.
 - Set `ACCESS_HASH_SECRET` so production passcode pages use a server-side pepper in addition to salted hashes.
 - Connect photo/object storage.
