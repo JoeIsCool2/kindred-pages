@@ -32,13 +32,45 @@ function readBody(req) {
 
 function validate(packet) {
   const missing = [];
-  for (const key of ['slug', 'plan', 'privacy', 'contact', 'readiness']) {
+  for (const key of ['slug', 'name', 'plan', 'privacy', 'contact', 'readiness', 'checkoutStatus']) {
     if (packet[key] === undefined || packet[key] === null || packet[key] === '') missing.push(key);
   }
   if (packet.privacy === 'password' && !packet.accessCode) missing.push('accessCode');
   if (packet.privacy === 'invite' && !packet.inviteToken) missing.push('inviteToken');
   if (Number(packet.readiness || 0) < 100) missing.push('readiness:100');
+  if (packet.checkoutStatus !== 'Paid') missing.push('checkoutStatus:Paid');
+  if (!reviewComplete(packet.familyApproval)) missing.push('familyApproval:complete');
+  if (!reviewComplete(packet.privacyReview)) missing.push('privacyReview:complete');
+  if (!reviewComplete(packet.sensitiveReview)) missing.push('sensitiveReview:complete');
   return missing;
+}
+
+function reviewComplete(review) {
+  return Boolean(
+    review?.reviewer &&
+    review?.reviewedAt &&
+    Array.isArray(review?.checks) &&
+    review.checks.length &&
+    review.checks.every((check) => check.done)
+  );
+}
+
+async function existingMemorial(supabaseUrl, serviceKey, slug) {
+  const response = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/memorials?slug=eq.${encodeURIComponent(slug)}&select=id,publish_eligible,stripe_payment_status,checkout_status&limit=1`, {
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      Accept: 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Supabase publish eligibility lookup failed: ${detail}`);
+  }
+
+  const [row] = await response.json();
+  return row || null;
 }
 
 async function saveToSupabase(packet) {
@@ -46,19 +78,38 @@ async function saveToSupabase(packet) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
   if (!supabaseUrl || !serviceKey) return null;
 
+  const current = await existingMemorial(supabaseUrl, serviceKey, packet.slug);
+  if (!current?.publish_eligible || current?.stripe_payment_status !== 'paid') {
+    const error = new Error('Stripe payment has not been verified for this memorial.');
+    error.status = 409;
+    error.code = 'payment-required';
+    throw error;
+  }
+
+  const metadata = packet.shareMetadata || {};
+
   const row = {
     slug: packet.slug,
+    name: packet.name,
     contact_email: packet.contact,
     privacy: packet.privacy,
     access_code_hash: packet.privacy === 'password' ? hashPasscode(packet.accessCode) : null,
     invite_token: packet.inviteToken || null,
     custom_domain: packet.customDomain || null,
+    gathering_type: packet.gatheringType || null,
     plan: packet.plan,
     plan_price: packet.planDetails?.price || null,
     billing_mode: packet.planDetails?.billing || null,
     checkout_payload: sanitizeAccessPayload(packet),
     launch_status: 'Published',
-    publish_target: packet.shareUrl || packet.productionUrl || null,
+    checkout_status: 'Paid',
+    invite_status: packet.inviteStatus || 'Not sent',
+    publish_target: packet.publishTarget || packet.shareUrl || packet.productionUrl || null,
+    search_title: metadata.title || null,
+    search_description: metadata.description || null,
+    share_image_url: metadata.image || null,
+    canonical_url: metadata.url || packet.shareUrl || null,
+    robots_directive: packet.privacy === 'public' ? (metadata.robots || 'index,follow') : 'noindex,nofollow',
     launch_approval: packet.familyApproval || null,
     privacy_review: packet.privacyReview || null,
     sensitive_review: packet.sensitiveReview || null,
@@ -117,8 +168,9 @@ module.exports = async function handler(req, res) {
       slug: packet.slug
     });
   } catch (error) {
-    return sendJson(res, 502, {
+    return sendJson(res, error.status || 502, {
       error: 'Publish integration failed',
+      code: error.code || 'publish-failed',
       detail: error.message
     });
   }

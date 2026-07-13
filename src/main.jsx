@@ -2364,6 +2364,7 @@ function App() {
 
   const launchPayload = () => ({
     slug: site.slug,
+    name: site.name,
     gatheringType: site.gatheringType,
     plan: site.plan,
     planDetails: getPlanDetails(site.plan),
@@ -2375,6 +2376,9 @@ function App() {
     privacyReview: site.privacyReview,
     sensitiveReview: site.sensitiveReview,
     familyApproval: site.launchApproval,
+    checkoutStatus: site.checkoutStatus,
+    inviteStatus: site.inviteStatus,
+    publishTarget: site.publishTarget,
     shareMetadata: shareMetadata(),
     shareUrl,
     productionUrl,
@@ -2663,6 +2667,10 @@ function App() {
     }
     if (!sensitiveReviewComplete(site)) {
       setToast('Record sensitive details review first');
+      return;
+    }
+    if (site.checkoutStatus !== 'Paid') {
+      setToast('Verify checkout before publishing');
       return;
     }
     const payload = launchPayload();

@@ -59,6 +59,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm service programs include a polished cover, order of service, participant list, readings, music, tributes, notes, family wishes, and QR memory link.
 - Confirm support needs can be created, claimed by guests, marked complete, exported in guest/day-of guides, and preserved in the archive.
 - Confirm checkout, publish endpoint, domain setup, and invite batch states work in production.
+- Confirm `/api/publish` refuses launch until checkout is verified paid and the Stripe webhook has set `publish_eligible`.
 - Confirm the five-step launch path clearly shows review, payment, publishing, invites, and preservation states.
 - Confirm family launch approval requires reviewer, timestamp, final review checklist, and approval packet before publishing.
 - Confirm Sensitive Details Review requires reviewer, timestamp, checklist, notes, and approval-packet inclusion before publishing.
