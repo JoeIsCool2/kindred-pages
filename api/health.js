@@ -155,6 +155,7 @@ module.exports = async function handler(req, res) {
     rsvps,
     supportNeeds,
     authSessions,
+    guestInvites,
     mediaBucket,
     checkout,
     guestNotifications,
@@ -169,6 +170,7 @@ module.exports = async function handler(req, res) {
     checkSupabaseTable('rsvps'),
     checkSupabaseTable('support_needs'),
     checkSupabaseTable('auth_sessions'),
+    checkSupabaseTable('guest_invites'),
     checkMediaBucket(),
     checkStripe(),
     checkResend(['GUEST_NOTIFICATION_FROM_EMAIL', 'INVITE_FROM_EMAIL']),
@@ -190,6 +192,7 @@ module.exports = async function handler(req, res) {
     checkout.connected &&
     guestNotifications.connected &&
     inviteDelivery.connected &&
+    guestInvites.connected &&
     adminAuthConnected
   );
 
@@ -209,7 +212,7 @@ module.exports = async function handler(req, res) {
       publishDatabase: state(supabaseConfigured, memorials.connected, true, memorials.detail),
       accessControl: state(supabaseConfigured, memorials.connected, true, memorials.detail),
       mediaStorage: state(mediaBucket.configured, mediaBucket.connected, true, mediaBucket.detail),
-      inviteDelivery: state(inviteDeliveryConfigured, inviteDelivery.connected, true, inviteDelivery.detail),
+      inviteDelivery: state(inviteDeliveryConfigured, inviteDelivery.connected && guestInvites.connected, true, inviteDelivery.connected && guestInvites.connected ? 'Invite delivery and recipient ledger reachable' : `${inviteDelivery.detail}; ${guestInvites.detail}`),
       supportEmail: state(present('VITE_SUPPORT_EMAIL') || present('SUPPORT_EMAIL'), present('VITE_SUPPORT_EMAIL') || present('SUPPORT_EMAIL'), false)
     }
   }, null, 2));

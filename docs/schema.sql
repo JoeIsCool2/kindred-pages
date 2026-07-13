@@ -134,6 +134,23 @@ create table rsvps (
   created_at timestamptz not null default now()
 );
 
+create table guest_invites (
+  id uuid primary key default gen_random_uuid(),
+  memorial_id uuid not null references memorials(id) on delete cascade,
+  name text not null,
+  email text,
+  phone text,
+  guest_group text,
+  delivery_provider text,
+  delivery_status text not null default 'Prepared',
+  provider_message_id text,
+  private_invite_url text,
+  sent_at timestamptz,
+  failed_at timestamptz,
+  failure_reason text,
+  created_at timestamptz not null default now()
+);
+
 create table photos (
   id uuid primary key default gen_random_uuid(),
   memorial_id uuid not null references memorials(id) on delete cascade,
@@ -314,6 +331,8 @@ create index memorial_members_user_id_idx on memorial_members(user_id);
 create index auth_sessions_slug_idx on auth_sessions(slug);
 create index auth_sessions_token_hash_idx on auth_sessions(token_hash);
 create index rsvps_memorial_id_idx on rsvps(memorial_id);
+create index guest_invites_memorial_id_idx on guest_invites(memorial_id);
+create index guest_invites_email_idx on guest_invites(email);
 create index photos_memorial_id_idx on photos(memorial_id);
 create index coadmins_memorial_id_idx on coadmins(memorial_id);
 create index partner_account_members_partner_id_idx on partner_account_members(partner_id);
@@ -338,6 +357,7 @@ alter table memorial_members enable row level security;
 alter table auth_sessions enable row level security;
 alter table memories enable row level security;
 alter table rsvps enable row level security;
+alter table guest_invites enable row level security;
 alter table photos enable row level security;
 alter table coadmins enable row level security;
 alter table partner_accounts enable row level security;
@@ -444,6 +464,11 @@ create policy "members manage memories"
 
 create policy "members manage rsvps"
   on rsvps for all
+  using (current_user_can_manage_memorial(memorial_id))
+  with check (current_user_can_manage_memorial(memorial_id));
+
+create policy "members manage guest invites"
+  on guest_invites for all
   using (current_user_can_manage_memorial(memorial_id))
   with check (current_user_can_manage_memorial(memorial_id));
 
