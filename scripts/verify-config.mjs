@@ -26,6 +26,9 @@ const required = [
   ['VITE_AUTH_ENDPOINT', 'Admin authentication endpoint for family and partner sessions'],
   ['VITE_AUDIT_ENDPOINT', 'Append-only audit log endpoint for family and partner actions'],
   ['VITE_DRAFT_ENDPOINT', 'Protected draft persistence endpoint'],
+  ['VITE_MEMORY_ENDPOINT', 'Guest memory submission endpoint'],
+  ['VITE_RSVP_ENDPOINT', 'Guest RSVP endpoint'],
+  ['VITE_SUPPORT_CLAIM_ENDPOINT', 'Guest support claim endpoint'],
   ['VITE_SUPPORT_EMAIL', 'Reachable support email']
 ];
 
@@ -49,6 +52,7 @@ const optional = [
   ['INVITE_WEBHOOK_SECRET', 'Optional invite webhook bearer secret'],
   ['RESEND_API_KEY', 'Server-side Resend key for invite email delivery'],
   ['INVITE_FROM_EMAIL', 'Verified from-address for invite emails'],
+  ['GUEST_NOTIFICATION_FROM_EMAIL', 'Verified from-address for guest action notifications'],
   ['SUPPORT_EMAIL', 'Server-side support email fallback']
 ];
 

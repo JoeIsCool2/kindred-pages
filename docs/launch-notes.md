@@ -21,6 +21,8 @@
 - Configure `/api/auth` with admin sign-in delivery credentials.
 - Configure `/api/audit` with Supabase service credentials for append-only activity logs.
 - Configure `/api/drafts` with Supabase service credentials for protected draft autosave.
+- Configure `/api/memories`, `/api/rsvps`, and `/api/support-claims` with Supabase service credentials for durable guest workflows.
+- Configure `GUEST_NOTIFICATION_FROM_EMAIL` if guest submissions should notify the family by email.
 - Connect database tables for memorials, memories, RSVPs, co-admins, support links, and launch tasks.
 - Configure `/api/access` with Supabase server-side credentials for invite and passcode checks.
 - Set `ACCESS_HASH_SECRET` so production passcode pages use a server-side pepper in addition to salted hashes.

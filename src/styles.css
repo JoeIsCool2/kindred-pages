@@ -1085,7 +1085,7 @@ input:focus, textarea:focus { border-color: #5b7f6b; box-shadow: 0 0 0 3px rgba(
 .prefix-input small { padding-left: 12px; color: var(--muted); white-space: nowrap; }
 .prefix-input input { border: 0; box-shadow: none; }
 
-.template-grid, .tone-grid, .privacy-grid, .keepsake-grid, .pricing, .stat-grid, .ops-grid, .message-grid, .announcement-grid, .care-summary, .contact-list, .guest-faq-editor, .custom-care-list, .public-faq-list, .public-custom-care-list, .support-editor, .support-need-list, .anniversary-list, .public-care-grid, .public-support-grid, .launch-status-grid, .snapshot-grid, .integration-grid, .plan-picker, .partner-stats, .story-prompt-grid, .helper-grid, .activity-list, .approval-checks, .preset-grid, .guest-update-list, .public-update-list, .obituary-placement-list {
+.template-grid, .tone-grid, .privacy-grid, .keepsake-grid, .pricing, .stat-grid, .ops-grid, .message-grid, .announcement-grid, .care-summary, .contact-list, .guest-faq-editor, .custom-care-list, .public-faq-list, .public-custom-care-list, .support-editor, .support-need-list, .anniversary-list, .public-care-grid, .public-support-grid, .launch-status-grid, .snapshot-grid, .integration-grid, .plan-picker, .partner-stats, .story-prompt-grid, .helper-grid, .activity-list, .approval-checks, .preset-grid, .guest-update-list, .public-update-list, .obituary-placement-list, .more-tools-grid {
   display: grid;
   gap: 12px;
 }
@@ -1107,7 +1107,7 @@ input:focus, textarea:focus { border-color: #5b7f6b; box-shadow: 0 0 0 3px rgba(
 .plan-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 4px 0 18px; }
 .preset-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
-.template, .tone, .choice, .keepsake, .pricing article, .memory-edit, .print-card, .prompt, .stat, .review-card, .ops-card, .support-edit, .support-card, .support-need-edit, .public-need, .public-stream-card, .urgent-update-banner, .public-action-bar, .livestream-panel, .trust-panel, .readiness-panel, .launch-issues-panel, .launch-issue, .launch-clear, .launch-report-panel, .launch-report-summary, .snapshot-panel, .snapshot-card, .integration-panel, .integration-card, .admin-access-panel, .admin-access-summary, .admin-access-grid article, .accessibility-panel, .access-panel, .access-link-card, .privacy-review-panel, .privacy-review-summary, .sensitive-review-panel, .sensitive-review-summary, .archive-panel, .archive-manifest, .handoff-panel, .handoff-summary, .closure-request, .message-card, .announcement-card, .data-safety, .care-note, .contact-edit, .guest-faq-edit, .custom-care-edit, .public-faq-item, .public-custom-care-item, .aftercare, .anniversary-card, .thank-you-item, .aftercare-packet, .coordinator-brief, .brief-list article, .day-of-packet, .day-of-summary, .day-of-task, .launch-command, .launch-status, .plan-option, .checkout-summary, .partner-hero, .draft-card, .story-helper, .program-builder, .service-selection, .helper-card, .activity-card, .share-preview-panel, .share-preview-card, .moderation-history, .private-card, .approval-panel, .approval-summary, .setup-presets, .preset-card, .guest-import-panel, .guest-confirmation, .guest-update-edit, .public-update, .obituary-placement {
+.template, .tone, .choice, .keepsake, .pricing article, .memory-edit, .print-card, .prompt, .stat, .review-card, .ops-card, .support-edit, .support-card, .support-need-edit, .public-need, .public-stream-card, .urgent-update-banner, .public-action-bar, .livestream-panel, .trust-panel, .readiness-panel, .launch-issues-panel, .launch-issue, .launch-clear, .launch-report-panel, .launch-report-summary, .snapshot-panel, .snapshot-card, .integration-panel, .integration-card, .admin-access-panel, .admin-access-summary, .admin-access-grid article, .accessibility-panel, .access-panel, .access-link-card, .privacy-review-panel, .privacy-review-summary, .sensitive-review-panel, .sensitive-review-summary, .archive-panel, .archive-manifest, .handoff-panel, .handoff-summary, .closure-request, .message-card, .announcement-card, .data-safety, .care-note, .contact-edit, .guest-faq-edit, .custom-care-edit, .public-faq-item, .public-custom-care-item, .aftercare, .anniversary-card, .thank-you-item, .aftercare-packet, .coordinator-brief, .brief-list article, .day-of-packet, .day-of-summary, .day-of-task, .launch-command, .launch-status, .plan-option, .checkout-summary, .partner-hero, .draft-card, .story-helper, .program-builder, .service-selection, .helper-card, .activity-card, .share-preview-panel, .share-preview-card, .moderation-history, .private-card, .approval-panel, .approval-summary, .setup-presets, .preset-card, .guest-import-panel, .guest-confirmation, .guest-update-edit, .public-update, .obituary-placement, .more-tool-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
@@ -1808,6 +1808,34 @@ input:focus, textarea:focus { border-color: #5b7f6b; box-shadow: 0 0 0 3px rgba(
   margin: 0 0 20px;
   padding: 16px;
   background: #fffdf8;
+}
+.more-tools-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+.more-tool-card {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 6px 12px;
+  align-items: start;
+  padding: 16px;
+  text-align: left;
+  color: var(--ink);
+}
+.more-tool-card svg {
+  grid-row: 1 / span 2;
+  color: #557867;
+}
+.more-tool-card strong {
+  font-size: 1rem;
+}
+.more-tool-card span {
+  color: var(--muted);
+  line-height: 1.42;
+}
+.more-tool-card:hover {
+  border-color: #b8c9bd;
+  background: #f8fbf8;
 }
 .handoff-summary {
   display: grid;
@@ -4636,7 +4664,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
 @media (max-width: 860px) {
   .topbar { position: static; align-items: flex-start; flex-wrap: wrap; }
   .site-nav { order: 3; width: 100%; flex-wrap: wrap; overflow: visible; }
-  .save-note, .storage-note { display: none; }
+  .save-note, .storage-note, .progress-pill { display: none; }
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .hero h1 { font-size: clamp(3rem, 13vw, 4.8rem); }
   .hero-panel, .hero-panel img { min-height: 360px; }
@@ -4647,7 +4675,7 @@ cite { display: block; margin-top: 10px; color: #66736f; font-style: normal; fon
   .builder-shell { grid-template-columns: 1fr; }
   .rail { position: static; display: grid; grid-template-columns: 1fr; }
   .nav-step { display: inline-flex; width: auto; margin: 0 5px 7px 0; }
-  .grid.two, .tone-grid, .privacy-grid, .keepsake-grid, .template-grid, .preset-grid, .builder-start-steps, .stat-grid, .partner-stats, .desk-split, .ops-grid, .message-grid, .announcement-grid, .guest-update-list, .guest-faq-editor, .custom-care-list, .public-faq-list, .public-custom-care-list, .readiness-head, .check-grid, .launch-issue, .care-summary, .contact-list, .support-editor, .support-need-list, .anniversary-list, .public-care-grid, .public-support-grid, .public-update-list, .obituary-placement-list, .launch-status-grid, .launch-path, .launch-report-grid, .snapshot-grid, .integration-grid, .admin-access-grid, .approval-checks, .privacy-review-grid, .privacy-review-checks, .sensitive-review-grid, .sensitive-review-checks, .coordinator-brief-grid, .brief-list article, .handoff-grid, .accessibility-checks, .plan-picker, .launch-actions, .story-prompt-grid, .helper-grid, .meta-grid { grid-template-columns: 1fr; }
+  .grid.two, .tone-grid, .privacy-grid, .keepsake-grid, .template-grid, .preset-grid, .builder-start-steps, .stat-grid, .partner-stats, .desk-split, .ops-grid, .message-grid, .announcement-grid, .guest-update-list, .guest-faq-editor, .custom-care-list, .public-faq-list, .public-custom-care-list, .readiness-head, .check-grid, .launch-issue, .care-summary, .contact-list, .support-editor, .support-need-list, .anniversary-list, .public-care-grid, .public-support-grid, .public-update-list, .obituary-placement-list, .launch-status-grid, .launch-path, .launch-report-grid, .snapshot-grid, .integration-grid, .admin-access-grid, .approval-checks, .privacy-review-grid, .privacy-review-checks, .sensitive-review-grid, .sensitive-review-checks, .coordinator-brief-grid, .brief-list article, .handoff-grid, .accessibility-checks, .plan-picker, .launch-actions, .story-prompt-grid, .helper-grid, .meta-grid, .more-tools-grid { grid-template-columns: 1fr; }
   .review-card { align-items: flex-start; flex-direction: column; }
   .review-actions { justify-content: flex-start; min-width: 0; width: 100%; }
   .launch-hero { align-items: stretch; flex-direction: column; }

@@ -493,21 +493,19 @@ function getPlanDetails(planName) {
 }
 
 const steps = [
-  { id: 'person', label: 'Person', icon: FileHeart },
-  { id: 'story', label: 'Story', icon: Sparkles },
-  { id: 'service', label: 'Service', icon: CalendarDays },
-  { id: 'guests', label: 'Guest Care', icon: UserCheck },
+  { id: 'person', label: 'Start', icon: FileHeart },
+  { id: 'service', label: 'Details', icon: CalendarDays },
+  { id: 'guests', label: 'Guests', icon: UserCheck },
   { id: 'memories', label: 'Memories', icon: MessageCircle },
-  { id: 'desk', label: 'Family Desk', icon: Users },
-  { id: 'partner', label: 'Partner Desk', icon: HeartHandshake },
-  { id: 'announcements', label: 'Announcements', icon: Mail },
-  { id: 'keepsakes', label: 'Keepsakes', icon: Printer },
-  { id: 'settings', label: 'Settings', icon: Shield }
+  { id: 'settings', label: 'Review', icon: Shield },
+  { id: 'launch', label: 'Launch', icon: Rocket },
+  { id: 'more', label: 'More', icon: Archive }
 ];
 
 function stepFromHash(hash) {
   const id = hash.replace('#', '');
-  return steps.some((step) => step.id === id) ? id : '';
+  const legacy = ['story', 'desk', 'partner', 'announcements', 'keepsakes'];
+  return steps.some((step) => step.id === id) || legacy.includes(id) ? id : '';
 }
 
 function routeFromPath(pathname) {
@@ -759,15 +757,12 @@ function getFamilyLaunchGuide(site, progress) {
 function getStepStatuses(site, progress) {
   return {
     person: Boolean(site.name && site.lifespan && site.gatheringType && site.slug),
-    story: Boolean(site.story && site.story.length > 120 && site.milestones?.length),
     service: Boolean(site.serviceTitle && site.serviceDate && site.serviceTime && site.servicePlace),
     guests: Boolean(site.accessibility && site.parking && site.eventSchedule?.length && site.guestFaq?.length),
     memories: Boolean(site.memories?.length || site.pendingMemories?.length),
-    desk: Boolean(site.rsvp?.length && site.pendingMemories?.length === 0),
-    partner: Boolean(site.partner?.organization && site.partner?.coordinator && site.partner?.handoffStatus),
-    announcements: Boolean(site.messages?.invite && site.messages?.obituary && site.obituaryPlacements?.length),
-    keepsakes: Boolean(site.slug && site.serviceOrder?.length && site.programPeople?.length),
-    settings: progress === 100 && privacyReviewComplete(site) && sensitiveReviewComplete(site) && approvalComplete(site)
+    settings: privacyReviewComplete(site) && sensitiveReviewComplete(site),
+    launch: progress === 100 && approvalComplete(site),
+    more: Boolean(site.messages?.invite && site.slug && site.serviceOrder?.length && site.programPeople?.length)
   };
 }
 
@@ -1106,6 +1101,9 @@ function App() {
   const authEndpoint = import.meta.env.VITE_AUTH_ENDPOINT || '/api/auth';
   const auditEndpoint = import.meta.env.VITE_AUDIT_ENDPOINT || '/api/audit';
   const draftEndpoint = import.meta.env.VITE_DRAFT_ENDPOINT || '/api/drafts';
+  const memoryEndpoint = import.meta.env.VITE_MEMORY_ENDPOINT || '/api/memories';
+  const rsvpEndpoint = import.meta.env.VITE_RSVP_ENDPOINT || '/api/rsvps';
+  const supportClaimEndpoint = import.meta.env.VITE_SUPPORT_CLAIM_ENDPOINT || '/api/support-claims';
   const integrationChecks = useMemo(() => ([
     { label: 'Admin auth', detail: authEndpoint ? 'Auth endpoint set' : 'Needs auth endpoint', ready: Boolean(authEndpoint), icon: UserCheck },
     { label: 'Audit log', detail: auditEndpoint ? 'Audit endpoint set' : 'Needs audit endpoint', ready: Boolean(auditEndpoint), icon: Clock },
@@ -1115,10 +1113,11 @@ function App() {
     { label: 'Payments', detail: checkoutUrl ? 'Checkout URL set' : 'Needs checkout URL', ready: Boolean(checkoutUrl && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY), icon: CreditCard },
     { label: 'Publishing', detail: publishEndpoint ? 'Publish endpoint set' : 'Needs publish endpoint', ready: Boolean(publishEndpoint), icon: Rocket },
     { label: 'Invite delivery', detail: inviteEndpoint ? 'Invite endpoint set' : 'Needs invite endpoint', ready: Boolean(inviteEndpoint), icon: Send },
+    { label: 'Guest actions', detail: memoryEndpoint && rsvpEndpoint && supportClaimEndpoint ? 'Guest endpoints set' : 'Needs guest endpoints', ready: Boolean(memoryEndpoint && rsvpEndpoint && supportClaimEndpoint), icon: MessageCircle },
     { label: 'Support email', detail: import.meta.env.VITE_SUPPORT_EMAIL || 'Needs support email', ready: Boolean(import.meta.env.VITE_SUPPORT_EMAIL), icon: Mail },
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
-  ]), [accessEndpoint, auditEndpoint, authEndpoint, checkoutUrl, draftEndpoint, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
+  ]), [accessEndpoint, auditEndpoint, authEndpoint, checkoutUrl, draftEndpoint, inviteEndpoint, mediaEndpoint, memoryEndpoint, publishEndpoint, productionUrl, rsvpEndpoint, supportClaimEndpoint]);
 
   useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);
@@ -1189,7 +1188,7 @@ function App() {
     addActivity('Memory declined', 'A guest contribution was kept private and removed from public review.');
   };
 
-  const addRsvp = (guest = {}) => {
+  const addRsvpLocally = (guest = {}) => {
     setSite((current) => ({
       ...current,
       rsvp: [
@@ -1209,6 +1208,29 @@ function App() {
       ]
     }));
     if (guest.name) setToast('RSVP added to guest list');
+  };
+
+  const addRsvp = async (guest = {}) => {
+    if (guest.name && rsvpEndpoint) {
+      try {
+        const response = await fetch(rsvpEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: site.slug || 'memorial', ...guest })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.status === 'saved') {
+          addRsvpLocally(guest);
+          addActivity('RSVP saved', `${guest.name} responded ${guest.attending || 'to the invitation'}.`);
+          return result;
+        }
+        if (response.status !== 202) throw new Error(result.error || 'RSVP endpoint rejected the packet');
+      } catch {
+        addActivity('RSVP saved locally', `${guest.name} responded, but production RSVP storage needs attention.`);
+      }
+    }
+    addRsvpLocally(guest);
+    return { status: 'local' };
   };
 
   const importGuestList = (text) => {
@@ -1298,7 +1320,7 @@ function App() {
     }));
   };
 
-  const claimSupportNeed = (index, name) => {
+  const claimSupportNeedLocally = (index, name) => {
     if (!name?.trim()) return;
     setSite((current) => ({
       ...current,
@@ -1308,6 +1330,34 @@ function App() {
     }));
     setToast('Support need claimed');
     addActivity('Support need claimed', `${name.trim()} offered help with a family support need.`);
+  };
+
+  const claimSupportNeed = async (index, name) => {
+    const need = site.supportNeeds?.[index];
+    if (need && name?.trim() && supportClaimEndpoint) {
+      try {
+        const response = await fetch(supportClaimEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: site.slug || 'memorial',
+            name: name.trim(),
+            needTitle: need.title,
+            detail: need.detail || ''
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.status === 'saved') {
+          claimSupportNeedLocally(index, name);
+          return result;
+        }
+        if (response.status !== 202) throw new Error(result.error || 'Support claim endpoint rejected the packet');
+      } catch {
+        addActivity('Support claim saved locally', `${name.trim()} offered help, but production support storage needs attention.`);
+      }
+    }
+    claimSupportNeedLocally(index, name);
+    return { status: 'local' };
   };
 
   const addAftercareReminder = () => {
@@ -1676,12 +1726,43 @@ function App() {
     }
   };
 
-  const submitGuestMemory = (memory) => {
+  const submitGuestMemoryLocally = (memory) => {
     setSite((current) => ({
       ...current,
       pendingMemories: [...current.pendingMemories, { ...memory, status: 'Pending', consent: memory.consent === true }]
     }));
     setToast('Memory sent for family review');
+  };
+
+  const submitGuestMemory = async (memory) => {
+    if (memoryEndpoint) {
+      try {
+        const response = await fetch(memoryEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: site.slug || 'memorial',
+            from: memory.from,
+            relation: memory.relation || '',
+            text: memory.text,
+            caption: memory.caption || '',
+            audioLabel: memory.audioLabel || '',
+            consent: memory.consent === true
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.status === 'saved') {
+          submitGuestMemoryLocally(memory);
+          addActivity('Memory saved for review', `${memory.from} sent a memory for family moderation.`);
+          return result;
+        }
+        if (response.status !== 202) throw new Error(result.error || 'Memory endpoint rejected the packet');
+      } catch {
+        addActivity('Memory saved locally', `${memory.from} sent a memory, but production memory storage needs attention.`);
+      }
+    }
+    submitGuestMemoryLocally(memory);
+    return { status: 'local' };
   };
 
   const downloadCsv = (name, rows) => {
@@ -3474,6 +3555,21 @@ function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata
           <Field label="Relationship line" value={site.relationship} onChange={(v) => update('relationship', v)} />
           <Field label="Page address" value={site.slug} prefix="kindred.page/" onChange={(v) => update('slug', v.toLowerCase().replace(/[^a-z0-9-]/g, '-'))} />
         </div>
+        <div className="story-helper">
+          <div>
+            <strong>Story, not a blank page</strong>
+            <p>Write the first warm version here. It can stay simple; the family can refine it later.</p>
+          </div>
+          <div className="story-prompt-grid">
+            {storyStarters.slice(0, 3).map((starter) => (
+              <button key={starter.title} className="story-prompt" onClick={() => addStoryStarter(starter.text)}>
+                <Sparkles size={16} />
+                <span>{starter.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <TextArea label="Life story" value={site.story} onChange={(v) => update('story', v)} />
         <div className="template-grid">
           {Object.entries(templates).map(([id, template]) => (
             <button key={id} className={site.template === id ? 'template selected' : 'template'} onClick={() => update('template', id)}>
@@ -4255,6 +4351,48 @@ function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata
     );
   }
 
+  if (active === 'more') {
+    const advancedSections = [
+      { id: 'desk', icon: Users, title: 'Family Desk', text: 'Guest list, support needs, helper invites, moderation, and handoff notes.' },
+      { id: 'announcements', icon: Mail, title: 'Announcements', text: 'Obituary, private invite, SMS, social, livestream, and thank-you wording.' },
+      { id: 'keepsakes', icon: Printer, title: 'Keepsakes', text: 'QR cards, service programs, memory book, guest guide, and archive exports.' },
+      { id: 'partner', icon: HeartHandshake, title: 'Partner Desk', text: 'Funeral-home coordination, co-branded drafts, and family ownership transfer.' },
+      { id: 'story', icon: Sparkles, title: 'Story Tools', text: 'Tone, timeline, story starters, music, food, and legacy details.' }
+    ];
+
+    return (
+      <Panel title="More Tools" intro="Advanced tools stay close, but out of the way until the family needs them.">
+        <div className="more-tools-grid">
+          {advancedSections.map((section) => {
+            const Icon = section.icon;
+            return (
+              <button className="more-tool-card" key={section.id} onClick={() => {
+                window.history.pushState(null, '', `/builder#${section.id}`);
+                window.dispatchEvent(new HashChangeEvent('hashchange'));
+              }}>
+                <Icon size={22} />
+                <strong>{section.title}</strong>
+                <span>{section.text}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="handoff-panel">
+          <div className="section-line">
+            <h3>Launch support packet</h3>
+            <span>Family-safe export</span>
+          </div>
+          <p>Use this when someone else needs to help without learning every builder screen.</p>
+          <div className="action-row">
+            <button className="primary" onClick={copyFamilyHandoffPacket}><Download size={17} /> Copy handoff packet</button>
+            <button className="secondary" onClick={downloadJson}><Archive size={17} /> Download archive</button>
+            <button className="secondary" onClick={resetSample}><Sparkles size={17} /> Load sample</button>
+          </div>
+        </div>
+      </Panel>
+    );
+  }
+
   const metadata = shareMetadata();
   const selectedPlan = getPlanDetails(site.plan);
   const launchSnapshot = getLaunchSnapshot(site);
@@ -4981,10 +5119,10 @@ function MemorialPage({ site, shareUrl, qrDataUrl, accessEndpoint, onGuestMemory
   const [supportNotice, setSupportNotice] = useState('');
   const [accessUnlocked, setAccessUnlocked] = useState(false);
 
-  const sendMemory = () => {
+  const sendMemory = async () => {
     if (!guestMemory.trim() || !guestConsent) return;
     const submitter = guestName.trim() || 'Guest';
-    onGuestMemory({ from: submitter, relation: guestRelation.trim(), text: guestMemory.trim(), photo: guestPhoto, caption: guestPhotoCaption.trim(), audio: guestAudio, audioLabel: guestAudioLabel.trim(), consent: guestConsent });
+    await onGuestMemory({ from: submitter, relation: guestRelation.trim(), text: guestMemory.trim(), photo: guestPhoto, caption: guestPhotoCaption.trim(), audio: guestAudio, audioLabel: guestAudioLabel.trim(), consent: guestConsent });
     setGuestName('');
     setGuestRelation('');
     setGuestMemory('');
@@ -5010,10 +5148,10 @@ function MemorialPage({ site, shareUrl, qrDataUrl, accessEndpoint, onGuestMemory
     reader.readAsDataURL(file);
   };
 
-  const sendRsvp = () => {
+  const sendRsvp = async () => {
     if (!rsvpName.trim()) return;
     const submitter = rsvpName.trim();
-    onGuestRsvp({ name: submitter, email: rsvpEmail.trim(), phone: rsvpPhone.trim(), group: 'Public RSVP', attending: rsvpAttendance, partySize: rsvpPartySize || '1', needs: rsvpNeeds.trim(), note: rsvpNote.trim() || 'No note' });
+    await onGuestRsvp({ name: submitter, email: rsvpEmail.trim(), phone: rsvpPhone.trim(), group: 'Public RSVP', attending: rsvpAttendance, partySize: rsvpPartySize || '1', needs: rsvpNeeds.trim(), note: rsvpNote.trim() || 'No note' });
     setRsvpName('');
     setRsvpEmail('');
     setRsvpPhone('');
@@ -5024,12 +5162,12 @@ function MemorialPage({ site, shareUrl, qrDataUrl, accessEndpoint, onGuestMemory
     setRsvpNotice(`Thank you, ${submitter}. Your RSVP was sent to the family.`);
   };
 
-  const claimNeed = (index) => {
+  const claimNeed = async (index) => {
     const name = supportClaimNames[index] || '';
     if (!name.trim()) return;
     const need = site.supportNeeds?.[index];
     const submitter = name.trim();
-    onSupportClaim(index, submitter);
+    await onSupportClaim(index, submitter);
     setSupportClaimNames((current) => ({ ...current, [index]: '' }));
     setSupportNotice(`Thank you, ${submitter}. The family will see that you claimed ${need?.title || 'this support need'}.`);
   };

@@ -41,6 +41,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm pasted guest lists import names, emails, phones, groups, invite status, and follow-up defaults without duplicating existing guests.
 - Confirm per-guest and pending-invite copy tools include the private invite link, service details, and memory request wording.
 - Confirm public-page RSVP, support-claim, and memory-submission confirmations appear clearly after guest actions.
+- Confirm `/api/memories`, `/api/rsvps`, and `/api/support-claims` persist guest actions in Supabase before relying on the public page for a paid family.
 - Confirm guest records capture email, phone, group, invite status, and exported contact details.
 - Confirm announcement templates cover obituary, newspaper notice, SMS invite, social post, livestream reminder, and thank-you copy.
 - Confirm obituary placement tracker records outlet, deadline, contact, fee, and publication status.
@@ -93,7 +94,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Set `ACCESS_HASH_SECRET` before enabling passcode-protected pages in production.
 - Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.
 - Confirm invite batches can be queued through `/api/invites` or safely exported when delivery is not configured.
-- Confirm `/api/health` reports admin auth, audit logging, draft persistence, checkout, publish database, access control, media storage, invite delivery, and support email integration state.
+- Confirm `/api/health` reports configured, connected, and launch-blocking state for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, and support email integration state.
 - Connect checkout return handling, publish endpoint, and domain verification status.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.

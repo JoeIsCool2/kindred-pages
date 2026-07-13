@@ -9,11 +9,14 @@ This frontend is ready to connect to a hosted backend. The recommended first pro
 - `POST /api/audit`: appends family-admin and partner activity events to `activity_log` when Supabase service credentials are configured.
 - `GET /api/drafts`: loads `memorials.draft_payload` by slug when Supabase service credentials are configured.
 - `POST /api/drafts`: upserts protected family draft state into `memorials` through server-side Supabase credentials.
+- `POST /api/memories`: stores guest memories in `memories` with `Pending` moderation status and optionally notifies the family through Resend.
+- `POST /api/rsvps`: stores guest RSVP details in `rsvps` and optionally notifies the family through Resend.
+- `POST /api/support-claims`: marks a matching support need as claimed and optionally notifies the family through Resend.
 - `POST /api/publish`: validates the launch packet and upserts publish state into Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
 - `POST /api/access`: validates invite-link and passcode access attempts against stored memorial privacy records when Supabase service credentials are configured. Passcodes are verified against `access_code_hash`; raw passcodes are not stored in the publish packet.
 - `POST /api/media`: validates photo upload metadata and creates private storage upload targets when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `MEDIA_BUCKET` are configured.
 - `POST /api/invites`: validates guest invite batches and sends them through `INVITE_WEBHOOK_URL` or Resend when `RESEND_API_KEY` and `INVITE_FROM_EMAIL` are configured.
-- `GET /api/health`: reports whether admin auth, audit logging, draft persistence, checkout, publish database, access control, media storage, invite delivery, and support email integrations are configured.
+- `GET /api/health`: reports `configured`, `connected`, and `launchBlocking` status for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, and support email integrations.
 
 ## Core Tables
 
@@ -288,6 +291,8 @@ This frontend is ready to connect to a hosted backend. The recommended first pro
 
 - Hash passcodes with a salted verifier before storing `access_code_hash`; set `ACCESS_HASH_SECRET` as a server-only pepper for production.
 - Require `inviteToken` for invite-only publishing and `accessCode` for passcode publishing.
+- Store guest memories, RSVPs, and support claims server-side before relying on them for a paid family launch.
+- Keep guest memory status at `Pending` until a family moderator approves it.
 
 - Create memorial draft.
 - Update memorial draft.
