@@ -1012,7 +1012,7 @@ function App() {
     const timer = setTimeout(() => {
       saveSiteDraft(site).then((result) => {
         setSavedAt(new Date(result.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
-        setStorageStatus(result.mode === 'cloud' ? 'Cloud saved' : result.mode === 'local-fallback' ? 'Local saved, cloud retry' : 'Local saved');
+        setStorageStatus(result.mode === 'server' ? 'Protected draft saved' : result.mode === 'local-fallback' ? 'Local saved, server retry' : 'Local saved');
       });
     }, 220);
     return () => clearTimeout(timer);
@@ -1105,10 +1105,11 @@ function App() {
   const accessEndpoint = import.meta.env.VITE_ACCESS_ENDPOINT || '/api/access';
   const authEndpoint = import.meta.env.VITE_AUTH_ENDPOINT || '/api/auth';
   const auditEndpoint = import.meta.env.VITE_AUDIT_ENDPOINT || '/api/audit';
+  const draftEndpoint = import.meta.env.VITE_DRAFT_ENDPOINT || '/api/drafts';
   const integrationChecks = useMemo(() => ([
     { label: 'Admin auth', detail: authEndpoint ? 'Auth endpoint set' : 'Needs auth endpoint', ready: Boolean(authEndpoint), icon: UserCheck },
     { label: 'Audit log', detail: auditEndpoint ? 'Audit endpoint set' : 'Needs audit endpoint', ready: Boolean(auditEndpoint), icon: Clock },
-    { label: 'Cloud drafts', detail: import.meta.env.VITE_SUPABASE_URL ? 'Supabase URL set' : 'Needs Supabase URL', ready: Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY), icon: Archive },
+    { label: 'Protected drafts', detail: draftEndpoint ? 'Draft endpoint set' : 'Needs draft endpoint', ready: Boolean(draftEndpoint), icon: Archive },
     { label: 'Media storage', detail: mediaEndpoint ? 'Media endpoint set' : 'Needs media endpoint', ready: Boolean(mediaEndpoint), icon: Image },
     { label: 'Access checks', detail: accessEndpoint ? 'Access endpoint set' : 'Needs access endpoint', ready: Boolean(accessEndpoint), icon: Lock },
     { label: 'Payments', detail: checkoutUrl ? 'Checkout URL set' : 'Needs checkout URL', ready: Boolean(checkoutUrl && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY), icon: CreditCard },
@@ -1117,7 +1118,7 @@ function App() {
     { label: 'Support email', detail: import.meta.env.VITE_SUPPORT_EMAIL || 'Needs support email', ready: Boolean(import.meta.env.VITE_SUPPORT_EMAIL), icon: Mail },
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
-  ]), [accessEndpoint, auditEndpoint, authEndpoint, checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
+  ]), [accessEndpoint, auditEndpoint, authEndpoint, checkoutUrl, draftEndpoint, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
 
   useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);

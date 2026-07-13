@@ -11,6 +11,7 @@ module.exports = async function handler(req, res) {
     integrations: {
       adminAuth: present('AUTH_SECRET') && (present('AUTH_WEBHOOK_URL') || (present('RESEND_API_KEY') && present('AUTH_FROM_EMAIL'))),
       auditLogging: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),
+      draftPersistence: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),
       checkout: present('STRIPE_CHECKOUT_URL') || present('STRIPE_PAYMENT_LINK_BASE_URL'),
       publishDatabase: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),
       accessControl: present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY'),

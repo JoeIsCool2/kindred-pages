@@ -17,8 +17,6 @@ const env = Object.fromEntries(
 
 const required = [
   ['VITE_APP_URL', 'Public production URL'],
-  ['VITE_SUPABASE_URL', 'Supabase REST URL for cloud draft storage'],
-  ['VITE_SUPABASE_ANON_KEY', 'Supabase anonymous key with row-level security'],
   ['VITE_STRIPE_PUBLISHABLE_KEY', 'Stripe publishable key'],
   ['VITE_STRIPE_CHECKOUT_URL', 'Hosted checkout or checkout function URL'],
   ['VITE_PUBLISH_ENDPOINT', 'Publish endpoint for launch packets'],
@@ -27,10 +25,13 @@ const required = [
   ['VITE_ACCESS_ENDPOINT', 'Access-check endpoint for invite and passcode pages'],
   ['VITE_AUTH_ENDPOINT', 'Admin authentication endpoint for family and partner sessions'],
   ['VITE_AUDIT_ENDPOINT', 'Append-only audit log endpoint for family and partner actions'],
+  ['VITE_DRAFT_ENDPOINT', 'Protected draft persistence endpoint'],
   ['VITE_SUPPORT_EMAIL', 'Reachable support email']
 ];
 
 const optional = [
+  ['VITE_SUPABASE_URL', 'Optional public Supabase URL for read-only previews'],
+  ['VITE_SUPABASE_ANON_KEY', 'Optional Supabase anonymous key for read-only previews'],
   ['VITE_DEFAULT_MEMORIAL_SLUG', 'Default draft slug for cloud preview'],
   ['VITE_POSTHOG_KEY', 'Analytics key'],
   ['STRIPE_CHECKOUT_URL', 'Server-side Stripe Checkout redirect target'],

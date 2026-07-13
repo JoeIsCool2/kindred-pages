@@ -8,13 +8,17 @@ When Supabase environment variables are empty, drafts autosave to browser storag
 
 ## Cloud Mode
 
-Set these values to enable Supabase REST persistence:
+Set this frontend value so the builder saves through the server endpoint:
 
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+- `VITE_DRAFT_ENDPOINT`
+
+Set these server-only values so `/api/drafts` can load and save the draft:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `VITE_DEFAULT_MEMORIAL_SLUG`
 
-The adapter loads `memorials.draft_payload` by slug and upserts the current draft into `memorials` with `on_conflict=slug`. It also keeps a local fallback copy so a failed cloud save does not destroy a family's work.
+The adapter loads `memorials.draft_payload` by slug through `GET /api/drafts` and upserts the current draft through `POST /api/drafts`. It also keeps a local fallback copy so a failed server save does not destroy a family's work.
 
 ## Media Upload Planning
 

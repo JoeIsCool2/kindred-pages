@@ -76,6 +76,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Configure `/api/auth` with `AUTH_SECRET` and either an auth webhook or Resend delivery.
 - Confirm Admin Access can prepare or send sign-in links for owners, helpers, and partner coordinators.
 - Confirm `/api/audit` appends local activity events to `activity_log` with Supabase service credentials.
+- Confirm `/api/drafts` loads and saves `memorials.draft_payload` through server-side Supabase credentials.
 - Connect database tables from `docs/schema.sql`.
 - Confirm `/api/access` validates invite links and passcodes against stored memorial records before private pages render.
 - Connect Supabase draft persistence from `docs/storage-integration.md`.
@@ -90,7 +91,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for `/api/publish`.
 - Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.
 - Confirm invite batches can be queued through `/api/invites` or safely exported when delivery is not configured.
-- Confirm `/api/health` reports admin auth, audit logging, checkout, publish database, access control, media storage, invite delivery, and support email integration state.
+- Confirm `/api/health` reports admin auth, audit logging, draft persistence, checkout, publish database, access control, media storage, invite delivery, and support email integration state.
 - Connect checkout return handling, publish endpoint, and domain verification status.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.

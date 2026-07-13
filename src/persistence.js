@@ -1,18 +1,8 @@
 export const STORAGE_KEY = 'kindred-site';
 const META_KEY = 'kindred-site-meta';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const defaultSlug = import.meta.env.VITE_DEFAULT_MEMORIAL_SLUG || '';
-
-const hasSupabase = Boolean(supabaseUrl && supabaseKey);
-
-const headers = {
-  apikey: supabaseKey,
-  Authorization: `Bearer ${supabaseKey}`,
-  'Content-Type': 'application/json',
-  Prefer: 'return=representation'
-};
+const draftEndpoint = import.meta.env.VITE_DRAFT_ENDPOINT || '/api/drafts';
 
 function localMeta() {
   try {
@@ -31,55 +21,20 @@ function readLocal() {
   return localStorage.getItem(STORAGE_KEY);
 }
 
-function memorialRow(site) {
-  return {
-    slug: site.slug || 'memorial',
-    name: site.name,
-    lifespan: site.lifespan,
-    relationship: site.relationship,
-    story: site.story,
-    template: site.template,
-    tone: site.tone,
-    privacy: site.privacy,
-    service_title: site.serviceTitle,
-    service_date: site.serviceDate,
-    service_time: site.serviceTime,
-    service_place: site.servicePlace,
-    service_address: site.serviceAddress,
-    dress_note: site.dressNote,
-    livestream_url: site.livestream,
-    donation_url: site.donation,
-    contact_email: site.contact,
-    custom_domain: site.customDomain,
-    search_title: site.searchTitle,
-    search_description: site.searchDescription,
-    plan: site.plan,
-    launch_status: site.launchStatus,
-    checkout_status: site.checkoutStatus,
-    domain_status: site.domainStatus,
-    invite_status: site.inviteStatus,
-    publish_target: site.publishTarget,
-    draft_payload: site,
-    updated_at: new Date().toISOString()
-  };
-}
-
 export function persistenceLabel() {
-  return hasSupabase ? 'Cloud draft' : 'Local draft';
+  return draftEndpoint ? 'Protected draft' : 'Local draft';
 }
 
 export async function loadSiteDraft() {
-  if (!hasSupabase) return readLocal();
-
   const slug = defaultSlug || localMeta().slug;
-  if (!slug) return readLocal();
+  if (!draftEndpoint || !slug) return readLocal();
 
   try {
-    const url = `${supabaseUrl}/rest/v1/memorials?slug=eq.${encodeURIComponent(slug)}&select=draft_payload&limit=1`;
-    const response = await fetch(url, { headers });
-    if (!response.ok) throw new Error('Cloud draft unavailable');
-    const [row] = await response.json();
-    return row?.draft_payload || readLocal();
+    const response = await fetch(`${draftEndpoint}?slug=${encodeURIComponent(slug)}`);
+    if (response.status === 202 || response.status === 404) return readLocal();
+    if (!response.ok) throw new Error('Server draft unavailable');
+    const row = await response.json();
+    return row?.draft || readLocal();
   } catch {
     return readLocal();
   }
@@ -88,21 +43,20 @@ export async function loadSiteDraft() {
 export async function saveSiteDraft(site) {
   writeLocal(site);
 
-  if (!hasSupabase) {
+  if (!draftEndpoint) {
     return { mode: 'local', savedAt: new Date().toISOString() };
   }
 
   try {
-    const url = `${supabaseUrl}/rest/v1/memorials?on_conflict=slug`;
-    const response = await fetch(url, {
+    const response = await fetch(draftEndpoint, {
       method: 'POST',
-      headers,
-      body: JSON.stringify(memorialRow(site))
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ site })
     });
-    if (!response.ok) throw new Error('Cloud save unavailable');
-    return { mode: 'cloud', savedAt: new Date().toISOString() };
+    if (response.status === 202) return { mode: 'local-fallback', savedAt: new Date().toISOString() };
+    if (!response.ok) throw new Error('Server save unavailable');
+    return { mode: 'server', savedAt: new Date().toISOString() };
   } catch {
     return { mode: 'local-fallback', savedAt: new Date().toISOString() };
   }
 }
-
