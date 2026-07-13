@@ -91,7 +91,9 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Connect reminder scheduling for anniversary and after-service follow-up.
 - Connect payment provider for family and funeral-home plans.
 - Set `STRIPE_SECRET_KEY`, `STRIPE_FAMILY_PAGE_PRICE_ID`, `STRIPE_LEGACY_ARCHIVE_PRICE_ID`, and `STRIPE_FUNERAL_HOME_PRICE_ID` for `/api/checkout`.
+- Set `STRIPE_WEBHOOK_SECRET` and configure Stripe Checkout webhooks to `POST /api/checkout`.
 - Confirm `/api/checkout?action=status&session_id=...` verifies Stripe Checkout Session payment status before checkout is marked paid.
+- Confirm webhook events persist `stripe_checkout_session_id`, `stripe_payment_status`, and `publish_eligible` to Supabase.
 - Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for `/api/publish`.
 - Set `ACCESS_HASH_SECRET` before enabling passcode-protected pages in production.
 - Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.

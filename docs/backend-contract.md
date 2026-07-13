@@ -7,6 +7,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 ## Included Vercel Function Targets
 
 - `GET /api/checkout`: creates Stripe Checkout Sessions with `STRIPE_SECRET_KEY` and plan Price IDs, verifies Checkout Session status with `action=status`, and can fall back to `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL`.
+- `POST /api/checkout`: verifies Stripe webhooks with `STRIPE_WEBHOOK_SECRET` and persists completed Checkout Session payment state to Supabase.
 - `POST /api/auth`: prepares or sends family-admin and partner sign-in links through `AUTH_WEBHOOK_URL` or Resend when auth credentials are configured.
 - `POST /api/audit`: appends family-admin and partner activity events to `activity_log` when Supabase service credentials are configured.
 - `GET /api/drafts`: loads `memorials.draft_payload` by slug when Supabase service credentials are configured.
@@ -71,6 +72,15 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `plan_price`
 - `billing_mode`
 - `checkout_payload`
+- `stripe_checkout_session_id`
+- `stripe_payment_status`
+- `stripe_plan_price_id`
+- `stripe_customer_id`
+- `stripe_subscription_id`
+- `stripe_payment_intent_id`
+- `stripe_paid_at`
+- `billing_return_url`
+- `publish_eligible`
 - `launch_status`
 - `checkout_status`
 - `domain_status`
@@ -316,7 +326,8 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - Enable row-level security for all memorial, guest, partner, archive, support, and activity tables before adding browser-side Supabase access.
 - Seed `memorial_members` and `partner_account_members` when creating owners, helpers, and funeral-home coordinators.
 - Use Stripe Checkout Sessions with `STRIPE_SECRET_KEY`, `STRIPE_FAMILY_PAGE_PRICE_ID`, `STRIPE_LEGACY_ARCHIVE_PRICE_ID`, and `STRIPE_FUNERAL_HOME_PRICE_ID` before marking a payment as launch-ready.
-- Verify returned Checkout Session status server-side before setting `checkoutStatus` to `Paid`.
+- Set `STRIPE_WEBHOOK_SECRET` and route Stripe Checkout webhooks to `POST /api/checkout` so completed payment status is persisted even when the buyer does not return to the app.
+- Verify returned Checkout Session status server-side before setting `checkoutStatus` to `Paid`; never use a client-only timer or optimistic UI to mark checkout paid.
 
 - Create memorial draft.
 - Update memorial draft.

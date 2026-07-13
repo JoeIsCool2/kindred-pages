@@ -559,6 +559,7 @@ const checks = [
   ['.env.example', 'STRIPE_FAMILY_PAGE_PRICE_ID'],
   ['.env.example', 'STRIPE_LEGACY_ARCHIVE_PRICE_ID'],
   ['.env.example', 'STRIPE_FUNERAL_HOME_PRICE_ID'],
+  ['.env.example', 'STRIPE_WEBHOOK_SECRET'],
   ['.env.example', 'SUPABASE_SERVICE_ROLE_KEY'],
   ['.env.example', 'MEDIA_BUCKET'],
   ['.env.example', 'RESEND_API_KEY'],
@@ -570,6 +571,11 @@ const checks = [
   ['api/checkout.js', 'checkout/sessions'],
   ['api/checkout.js', "action === 'status'"],
   ['api/checkout.js', 'payment_status'],
+  ['api/checkout.js', 'STRIPE_WEBHOOK_SECRET'],
+  ['api/checkout.js', 'checkout.session.completed'],
+  ['api/checkout.js', 'verifyStripeSignature'],
+  ['api/checkout.js', 'persistStripePayment'],
+  ['api/checkout.js', 'stripe_checkout_session_id'],
   ['api/checkout.js', 'configuration-needed'],
   ['api/publish.js', 'SUPABASE_SERVICE_ROLE_KEY'],
   ['api/publish.js', 'Launch packet is not ready to publish'],
@@ -630,6 +636,7 @@ const checks = [
   ['api/health.js', 'inviteDelivery'],
   ['src/main.jsx', "'/api/checkout'"],
   ['src/main.jsx', 'Checkout verified'],
+  ['src/main.jsx', 'Needs checkout setup'],
   ['src/main.jsx', "'/api/auth'"],
   ['src/main.jsx', "'/api/audit'"],
   ['src/main.jsx', "'/api/drafts'"],
@@ -772,7 +779,9 @@ const checks = [
   ['docs/backend-contract.md', 'partner_account_members'],
   ['docs/backend-contract.md', 'row-level security'],
   ['docs/backend-contract.md', 'GET /api/checkout'],
+  ['docs/backend-contract.md', 'POST /api/checkout'],
   ['docs/backend-contract.md', 'STRIPE_SECRET_KEY'],
+  ['docs/backend-contract.md', 'STRIPE_WEBHOOK_SECRET'],
   ['docs/backend-contract.md', 'Checkout Session status'],
   ['docs/backend-contract.md', 'POST /api/auth'],
   ['docs/backend-contract.md', 'POST /api/audit'],
@@ -811,6 +820,7 @@ const checks = [
   ['scripts/verify-config.mjs', 'STRIPE_CHECKOUT_URL'],
   ['scripts/verify-config.mjs', 'STRIPE_SECRET_KEY'],
   ['scripts/verify-config.mjs', 'STRIPE_FAMILY_PAGE_PRICE_ID'],
+  ['scripts/verify-config.mjs', 'STRIPE_WEBHOOK_SECRET'],
   ['scripts/verify-config.mjs', 'SUPABASE_SERVICE_ROLE_KEY'],
   ['scripts/verify-config.mjs', 'VITE_AUTH_ENDPOINT'],
   ['scripts/verify-config.mjs', 'AUTH_SECRET'],
@@ -866,6 +876,9 @@ const checks = [
   ['docs/schema.sql', 'accessibility_checklist jsonb'],
   ['docs/schema.sql', 'plan_price text'],
   ['docs/schema.sql', 'checkout_payload jsonb'],
+  ['docs/schema.sql', 'stripe_checkout_session_id text'],
+  ['docs/schema.sql', 'stripe_payment_status text'],
+  ['docs/schema.sql', 'publish_eligible boolean not null default false'],
   ['docs/schema.sql', 'launch_approval jsonb'],
   ['docs/schema.sql', 'approved_by text'],
   ['docs/schema.sql', 'approved_at timestamptz'],
@@ -918,6 +931,16 @@ for (const [file, needle] of checks) {
   }
   if (!read(file).includes(needle)) {
     failures.push(`${file} does not include ${JSON.stringify(needle)}`);
+  }
+}
+
+const forbidden = [
+  ['src/main.jsx', "setTimeout(() => update('checkoutStatus', 'Paid')"]
+];
+
+for (const [file, needle] of forbidden) {
+  if (existsSync(join(root, file)) && read(file).includes(needle)) {
+    failures.push(`${file} still includes forbidden launch shortcut ${JSON.stringify(needle)}`);
   }
 }
 

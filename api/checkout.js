@@ -1,3 +1,5 @@
+const crypto = require('node:crypto');
+
 function sendJson(res, status, body) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -29,6 +31,58 @@ function appendCheckoutParams(returnUrl, params) {
     if (value) url.searchParams.set(key, value);
   }
   return url.toString();
+}
+
+function readRawBody(req) {
+  if (Buffer.isBuffer(req.body)) return Promise.resolve(req.body.toString('utf8'));
+  if (typeof req.body === 'string') return Promise.resolve(req.body);
+  if (req.body && typeof req.body === 'object') return Promise.resolve(JSON.stringify(req.body));
+
+  return new Promise((resolve, reject) => {
+    let raw = '';
+    req.setEncoding('utf8');
+    req.on('data', (chunk) => {
+      raw += chunk;
+      if (raw.length > 1_000_000) {
+        reject(new Error('Webhook body too large'));
+        req.destroy();
+      }
+    });
+    req.on('end', () => resolve(raw));
+    req.on('error', reject);
+  });
+}
+
+function timingSafeEqualHex(left, right) {
+  const leftBuffer = Buffer.from(left, 'hex');
+  const rightBuffer = Buffer.from(right, 'hex');
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function verifyStripeSignature(rawBody, signatureHeader) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET || '';
+  if (!secret) return { ok: false, error: 'Set STRIPE_WEBHOOK_SECRET to verify checkout webhooks.' };
+  if (!signatureHeader) return { ok: false, error: 'Missing Stripe-Signature header.' };
+
+  const parts = Object.fromEntries(signatureHeader.split(',').map((part) => {
+    const [key, value] = part.split('=');
+    return [key, value];
+  }));
+  const timestamp = parts.t;
+  const signature = parts.v1;
+  if (!timestamp || !signature) return { ok: false, error: 'Stripe-Signature header is incomplete.' };
+
+  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (!Number.isFinite(age) || age > 300) return { ok: false, error: 'Stripe webhook timestamp is outside tolerance.' };
+
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestamp}.${rawBody}`, 'utf8')
+    .digest('hex');
+
+  return timingSafeEqualHex(expected, signature)
+    ? { ok: true }
+    : { ok: false, error: 'Stripe webhook signature did not match.' };
 }
 
 function checkoutTarget(query) {
@@ -64,7 +118,9 @@ async function createStripeSession(query) {
     'line_items[0][quantity]': '1',
     'metadata[plan]': query.plan,
     'metadata[slug]': query.slug,
-    'metadata[contact]': query.contact || ''
+    'metadata[contact]': query.contact || '',
+    'metadata[return_url]': query.return_url || '',
+    'metadata[price_id]': priceId
   });
 
   const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
@@ -101,9 +157,91 @@ async function retrieveStripeSession(sessionId) {
   return response.json();
 }
 
+async function persistStripePayment(session) {
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  const slug = session.client_reference_id || session.metadata?.slug || '';
+  if (!supabaseUrl || !serviceKey || !slug) return null;
+
+  const paid = session.payment_status === 'paid';
+  const row = {
+    checkout_status: paid ? 'Paid' : 'Payment pending',
+    stripe_checkout_session_id: session.id || null,
+    stripe_payment_status: session.payment_status || null,
+    stripe_plan_price_id: session.metadata?.price_id || session.line_items?.data?.[0]?.price?.id || null,
+    stripe_customer_id: typeof session.customer === 'string' ? session.customer : session.customer?.id || null,
+    stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : session.subscription?.id || null,
+    stripe_payment_intent_id: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id || null,
+    stripe_paid_at: paid ? new Date().toISOString() : null,
+    billing_return_url: session.metadata?.return_url || null,
+    publish_eligible: paid,
+    updated_at: new Date().toISOString()
+  };
+
+  const response = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/memorials?slug=eq.${encodeURIComponent(slug)}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify(row)
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Supabase payment update failed: ${detail}`);
+  }
+
+  const saved = await response.json();
+  return { slug, saved: saved.length };
+}
+
+async function handleStripeWebhook(req, res) {
+  let rawBody;
+  try {
+    rawBody = await readRawBody(req);
+  } catch (error) {
+    return sendJson(res, 400, { error: error.message });
+  }
+
+  const signature = verifyStripeSignature(rawBody, req.headers['stripe-signature']);
+  if (!signature.ok) return sendJson(res, 400, { error: signature.error });
+
+  let event;
+  try {
+    event = JSON.parse(rawBody || '{}');
+  } catch {
+    return sendJson(res, 400, { error: 'Invalid Stripe webhook JSON.' });
+  }
+
+  if (event.type !== 'checkout.session.completed' && event.type !== 'checkout.session.async_payment_succeeded') {
+    return sendJson(res, 200, { status: 'ignored', type: event.type || 'unknown' });
+  }
+
+  try {
+    const persisted = await persistStripePayment(event.data?.object || {});
+    return sendJson(res, persisted ? 200 : 202, {
+      status: persisted ? 'payment-recorded' : 'configuration-needed',
+      message: persisted
+        ? 'Stripe payment status saved to Supabase.'
+        : 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to persist Stripe payment status.',
+      slug: persisted?.slug || event.data?.object?.client_reference_id || event.data?.object?.metadata?.slug || ''
+    });
+  } catch (error) {
+    return sendJson(res, 502, {
+      error: 'Stripe payment persistence failed',
+      detail: error.message
+    });
+  }
+}
+
 module.exports = async function handler(req, res) {
+  if (req.method === 'POST') return handleStripeWebhook(req, res);
+
   if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
+    res.setHeader('Allow', 'GET, POST');
     return sendJson(res, 405, { error: 'Method not allowed' });
   }
 

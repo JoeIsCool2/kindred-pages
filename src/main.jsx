@@ -2556,8 +2556,8 @@ function App() {
       setToast('Checkout opened');
       return;
     }
-    setTimeout(() => update('checkoutStatus', 'Paid'), 250);
-    setToast('Checkout marked paid');
+    update('checkoutStatus', 'Needs checkout setup');
+    setToast('Checkout needs setup');
   };
 
   const connectDomain = () => {

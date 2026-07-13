@@ -43,6 +43,7 @@ const optional = [
   ['STRIPE_FAMILY_PAGE_PRICE_ID', 'Stripe Price ID for Family Page plan'],
   ['STRIPE_LEGACY_ARCHIVE_PRICE_ID', 'Stripe Price ID for Legacy Archive plan'],
   ['STRIPE_FUNERAL_HOME_PRICE_ID', 'Stripe Price ID for Funeral Home plan'],
+  ['STRIPE_WEBHOOK_SECRET', 'Stripe webhook signing secret for payment persistence'],
   ['SUPABASE_URL', 'Server-side Supabase REST URL for publish endpoint'],
   ['SUPABASE_SERVICE_ROLE_KEY', 'Server-side Supabase service role key for publish endpoint'],
   ['ACCESS_HASH_SECRET', 'Optional server-side pepper for passcode hashes'],

@@ -88,8 +88,8 @@ async function checkStripe() {
     process.env.STRIPE_LEGACY_ARCHIVE_PRICE_ID,
     process.env.STRIPE_FUNERAL_HOME_PRICE_ID
   ].filter(Boolean);
-  const configured = present('STRIPE_SECRET_KEY') && priceIds.length === 3;
-  if (!configured) return { configured: false, connected: false, detail: 'Missing Stripe secret or plan price IDs' };
+  const configured = present('STRIPE_SECRET_KEY') && present('STRIPE_WEBHOOK_SECRET') && priceIds.length === 3;
+  if (!configured) return { configured: false, connected: false, detail: 'Missing Stripe secret, webhook secret, or plan price IDs' };
 
   const results = await Promise.all(priceIds.map((priceId) => probe(`https://api.stripe.com/v1/prices/${encodeURIComponent(priceId)}`, {
     headers: {
