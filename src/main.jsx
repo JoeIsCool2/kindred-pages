@@ -1120,6 +1120,29 @@ function App() {
   ]), [accessEndpoint, auditEndpoint, authEndpoint, checkoutUrl, draftEndpoint, inviteEndpoint, mediaEndpoint, memoryEndpoint, publishEndpoint, productionUrl, rsvpEndpoint, supportClaimEndpoint]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if (params.get('checkout') !== 'success' || !sessionId || !checkoutUrl) return;
+
+    fetch(`${checkoutUrl}?action=status&session_id=${encodeURIComponent(sessionId)}`)
+      .then((response) => response.json().then((result) => ({ response, result })).catch(() => ({ response, result: {} })))
+      .then(({ response, result }) => {
+        if (response.ok && result.status === 'paid') {
+          update('checkoutStatus', 'Paid');
+          addActivity('Checkout verified', `${result.plan || site.plan} payment was verified through Stripe Checkout.`);
+          setToast('Checkout verified');
+          window.history.replaceState(null, '', window.location.pathname || '/');
+        } else if (result.status === 'configuration-needed') {
+          update('checkoutStatus', 'Needs verification');
+          setToast('Checkout needs verification setup');
+        }
+      })
+      .catch(() => {
+        update('checkoutStatus', 'Needs verification');
+      });
+  }, [checkoutUrl]);
+
+  useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);
     document.title = metadata.title;
     upsertMeta('name', 'description', metadata.description);

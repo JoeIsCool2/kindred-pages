@@ -14,6 +14,7 @@ module.exports = async function handler(req, res) {
   const supabaseConfigured = present('SUPABASE_URL') && present('SUPABASE_SERVICE_ROLE_KEY');
   const resendConfigured = present('RESEND_API_KEY') && (present('INVITE_FROM_EMAIL') || present('GUEST_NOTIFICATION_FROM_EMAIL'));
   const inviteDeliveryConfigured = present('INVITE_WEBHOOK_URL') || (present('RESEND_API_KEY') && present('INVITE_FROM_EMAIL'));
+  const stripeConfigured = present('STRIPE_SECRET_KEY') && present('STRIPE_FAMILY_PAGE_PRICE_ID') && present('STRIPE_LEGACY_ARCHIVE_PRICE_ID') && present('STRIPE_FUNERAL_HOME_PRICE_ID');
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -22,7 +23,7 @@ module.exports = async function handler(req, res) {
     status: 'ok',
     launchReady: Boolean(
       supabaseConfigured &&
-      (present('STRIPE_CHECKOUT_URL') || present('STRIPE_PAYMENT_LINK_BASE_URL')) &&
+      stripeConfigured &&
       inviteDeliveryConfigured &&
       resendConfigured &&
       (present('AUTH_SECRET') && (present('AUTH_WEBHOOK_URL') || (present('RESEND_API_KEY') && present('AUTH_FROM_EMAIL'))))
@@ -33,7 +34,7 @@ module.exports = async function handler(req, res) {
       draftPersistence: state(supabaseConfigured),
       guestActions: state(supabaseConfigured),
       guestNotifications: state(resendConfigured),
-      checkout: state(present('STRIPE_CHECKOUT_URL') || present('STRIPE_PAYMENT_LINK_BASE_URL')),
+      checkout: state(stripeConfigured),
       publishDatabase: state(supabaseConfigured),
       accessControl: state(supabaseConfigured),
       mediaStorage: state(supabaseConfigured && present('MEDIA_BUCKET')),

@@ -6,7 +6,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 
 ## Included Vercel Function Targets
 
-- `GET /api/checkout`: validates checkout query parameters and redirects to `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL` when configured.
+- `GET /api/checkout`: creates Stripe Checkout Sessions with `STRIPE_SECRET_KEY` and plan Price IDs, verifies Checkout Session status with `action=status`, and can fall back to `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL`.
 - `POST /api/auth`: prepares or sends family-admin and partner sign-in links through `AUTH_WEBHOOK_URL` or Resend when auth credentials are configured.
 - `POST /api/audit`: appends family-admin and partner activity events to `activity_log` when Supabase service credentials are configured.
 - `GET /api/drafts`: loads `memorials.draft_payload` by slug when Supabase service credentials are configured.
@@ -315,6 +315,8 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - Keep guest memory status at `Pending` until a family moderator approves it.
 - Enable row-level security for all memorial, guest, partner, archive, support, and activity tables before adding browser-side Supabase access.
 - Seed `memorial_members` and `partner_account_members` when creating owners, helpers, and funeral-home coordinators.
+- Use Stripe Checkout Sessions with `STRIPE_SECRET_KEY`, `STRIPE_FAMILY_PAGE_PRICE_ID`, `STRIPE_LEGACY_ARCHIVE_PRICE_ID`, and `STRIPE_FUNERAL_HOME_PRICE_ID` before marking a payment as launch-ready.
+- Verify returned Checkout Session status server-side before setting `checkoutStatus` to `Paid`.
 
 - Create memorial draft.
 - Update memorial draft.

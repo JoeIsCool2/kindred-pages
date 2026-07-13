@@ -30,8 +30,8 @@
 - Connect photo/object storage.
 - Configure `/api/media` with Supabase storage credentials and a private media bucket.
 - Add transactional email templates.
-- Add Stripe or another payment provider.
-- Configure `/api/checkout` with a Stripe Checkout URL or payment link base.
+- Add Stripe Checkout products and prices for each plan.
+- Configure `/api/checkout` with `STRIPE_SECRET_KEY` and all plan Price IDs.
 - Configure `/api/publish` with Supabase server-side credentials.
 - Configure `/api/invites` with an invite webhook or Resend email credentials.
 - Check `/api/health` before announcing the site to paying families.
