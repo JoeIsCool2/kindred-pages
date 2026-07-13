@@ -1,4 +1,4 @@
-const { configured, memorialForSlug, notifyFamily, patchSupportNeed, readBody, sendJson } = require('./guest-actions');
+const { configured, memorialForSlug, notifyFamily, patchSupportNeed, readBody, sendJson } = require('../src/server/guest-actions');
 
 function validate(packet) {
   return ['slug', 'name', 'needTitle'].filter((key) => !packet[key]);

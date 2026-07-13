@@ -584,7 +584,7 @@ const checks = [
   ['api/rsvps.js', 'configuration-needed'],
   ['api/support-claims.js', 'Support claim packet is not ready'],
   ['api/support-claims.js', 'configuration-needed'],
-  ['api/guest-actions.js', 'GUEST_NOTIFICATION_FROM_EMAIL'],
+  ['src/server/guest-actions.js', 'GUEST_NOTIFICATION_FROM_EMAIL'],
   ['api/access.js', 'Access packet is not ready'],
   ['api/access.js', 'demo-fallback'],
   ['api/access.js', 'SUPABASE_SERVICE_ROLE_KEY'],

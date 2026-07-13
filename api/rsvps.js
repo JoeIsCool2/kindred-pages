@@ -1,4 +1,4 @@
-const { configured, insertRow, memorialForSlug, notifyFamily, readBody, sendJson } = require('./guest-actions');
+const { configured, insertRow, memorialForSlug, notifyFamily, readBody, sendJson } = require('../src/server/guest-actions');
 
 function validate(packet) {
   return ['slug', 'name', 'attending'].filter((key) => !packet[key]);
