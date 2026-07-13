@@ -121,7 +121,7 @@ npm run verify:config
 
 The static production output is generated in `dist/`.
 
-`npm run verify:config` expects real production values in `.env.local`; it will fail against blank demo values from `.env.example`.
+`npm run verify:config` expects real production values in `.env.local`; it fails against blank demo values from `.env.example`, rejects local demo auth/access switches, and validates the required Supabase, Stripe, Resend, auth, media, support, and endpoint settings before launch.
 
 Public trust pages are served from `/privacy.html`, `/terms.html`, and `/security.txt`.
 
@@ -157,6 +157,7 @@ Use [docs/production-checklist.md](docs/production-checklist.md) before a real d
 See [docs/research-rationale.md](docs/research-rationale.md) for the bereavement and social-support rationale behind the product decisions.
 
 Copy `.env.example` to `.env.local` when connecting hosted services.
+Set both `VITE_APP_URL` and `APP_URL` to the production HTTPS URL so browser links, checkout returns, and admin sign-in links use the same canonical site.
 
 ## Brand
 
