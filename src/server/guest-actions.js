@@ -76,6 +76,24 @@ async function insertRow(table, row) {
   return response.json();
 }
 
+async function patchRows(table, filters, row) {
+  const query = Object.entries(filters)
+    .map(([key, value]) => `${encodeURIComponent(key)}=eq.${encodeURIComponent(value)}`)
+    .join('&');
+  const response = await fetch(`${supabaseUrl()}/rest/v1/${table}?${query}`, {
+    method: 'PATCH',
+    headers: headers('return=representation'),
+    body: JSON.stringify(row)
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`${table} update failed: ${detail}`);
+  }
+
+  return response.json();
+}
+
 async function patchSupportNeed(memorialId, title, row) {
   const response = await fetch(`${supabaseUrl()}/rest/v1/support_needs?memorial_id=eq.${encodeURIComponent(memorialId)}&title=eq.${encodeURIComponent(title)}`, {
     method: 'PATCH',
@@ -118,6 +136,7 @@ module.exports = {
   insertRow,
   memorialForSlug,
   notifyFamily,
+  patchRows,
   patchSupportNeed,
   readBody,
   sendJson

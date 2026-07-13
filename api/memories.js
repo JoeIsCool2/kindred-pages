@@ -1,4 +1,4 @@
-const { configured, insertRow, memorialForSlug, notifyFamily, readBody, sendJson } = require('../src/server/guest-actions');
+const { configured, insertRow, memorialForSlug, notifyFamily, patchRows, readBody, sendJson } = require('../src/server/guest-actions');
 
 function validate(packet) {
   const missing = ['slug', 'from', 'text'].filter((key) => !packet[key]);
@@ -6,9 +6,15 @@ function validate(packet) {
   return missing;
 }
 
+function validateModeration(packet) {
+  const missing = ['slug', 'id', 'decision'].filter((key) => !packet[key]);
+  if (packet.decision && !['approved', 'rejected'].includes(String(packet.decision).toLowerCase())) missing.push('decision:approved-or-rejected');
+  return missing;
+}
+
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+  if (!['POST', 'PATCH'].includes(req.method)) {
+    res.setHeader('Allow', 'POST, PATCH');
     return sendJson(res, 405, { error: 'Method not allowed' });
   }
 
@@ -17,6 +23,72 @@ module.exports = async function handler(req, res) {
     packet = await readBody(req, 2_000_000);
   } catch {
     return sendJson(res, 400, { error: 'Invalid JSON body' });
+  }
+
+  if (req.method === 'PATCH') {
+    const missing = validateModeration(packet);
+    if (missing.length) {
+      return sendJson(res, 422, {
+        error: 'Memory moderation packet is not ready',
+        missing
+      });
+    }
+
+    if (!configured()) {
+      return sendJson(res, 202, {
+        status: 'configuration-needed',
+        message: 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to moderate guest memories server-side.',
+        moderationPacket: packet
+      });
+    }
+
+    try {
+      const memorial = await memorialForSlug(packet.slug);
+      if (!memorial) return sendJson(res, 404, { status: 'memorial-not-found', slug: packet.slug });
+
+      const decision = String(packet.decision).toLowerCase();
+      const now = new Date().toISOString();
+      const update = decision === 'approved'
+        ? {
+          status: 'Approved',
+          approved_at: now,
+          rejected_at: null,
+          review_note: packet.reviewNote || 'Approved by family moderator'
+        }
+        : {
+          status: 'Rejected',
+          approved_at: null,
+          rejected_at: now,
+          review_note: packet.reviewNote || 'Kept private by family moderator'
+        };
+
+      const saved = await patchRows('memories', {
+        id: packet.id,
+        memorial_id: memorial.id
+      }, update);
+
+      if (!saved.length) return sendJson(res, 404, { status: 'memory-not-found', id: packet.id });
+
+      await insertRow('activity_log', {
+        memorial_id: memorial.id,
+        actor: packet.reviewer || 'Family moderator',
+        action: decision === 'approved' ? 'Memory approved' : 'Memory kept private',
+        detail: update.review_note
+      });
+
+      return sendJson(res, 200, {
+        status: 'moderated',
+        id: packet.id,
+        moderation: update.status,
+        reviewedAt: now,
+        reviewNote: update.review_note
+      });
+    } catch (error) {
+      return sendJson(res, 502, {
+        error: 'Memory moderation failed',
+        detail: error.message
+      });
+    }
   }
 
   const missing = validate(packet);

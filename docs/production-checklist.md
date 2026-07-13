@@ -28,6 +28,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm passcode-protected pages store only `access_code_hash` and never store the raw passcode in publish packets.
 - Confirm guest memories enter moderation before publishing.
 - Confirm guest memories can be approved or kept private, and that kept-private records remain visible to family admins only.
+- Confirm approve/keep-private moderation updates persist through `PATCH /api/memories` and append `activity_log` records.
 - Confirm guest memories capture relationship context and review consent before submission.
 - Confirm guest photo memories upload privately, display in moderation, and publish only after approval.
 - Confirm family gallery photos support captions, cover-photo selection, and public/private visibility before publishing.

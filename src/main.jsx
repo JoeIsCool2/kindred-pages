@@ -1181,12 +1181,39 @@ function App() {
     }));
   };
 
-  const approveMemory = (index) => {
+  const moderateMemory = async (memory, decision) => {
+    if (!memoryEndpoint || !memory?.id) return { status: 'local' };
+
+    const response = await fetch(memoryEndpoint, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug: site.slug || 'memorial',
+        id: memory.id,
+        decision,
+        reviewer: site.coadmins?.[0]?.name || site.contact || 'Family moderator',
+        reviewNote: decision === 'approved' ? 'Approved by family moderator' : 'Kept private by family moderator'
+      })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok && response.status !== 202) throw new Error(result.error || 'Memory moderation failed');
+    return result;
+  };
+
+  const approveMemory = async (index) => {
+    const memory = site.pendingMemories[index];
+    try {
+      await moderateMemory(memory, 'approved');
+    } catch {
+      setToast('Moderation needs setup');
+      addActivity('Memory moderation needs setup', 'A memory approval could not be saved server-side.');
+      return;
+    }
     setSite((current) => {
       const approved = current.pendingMemories[index];
       return {
         ...current,
-        memories: [...current.memories, { from: approved.from, relation: approved.relation || '', text: approved.text, photo: approved.photo || '', caption: approved.caption || '', audio: approved.audio || '', audioLabel: approved.audioLabel || '', consent: approved.consent !== false }],
+        memories: [...current.memories, { id: approved.id || '', from: approved.from, relation: approved.relation || '', text: approved.text, photo: approved.photo || '', caption: approved.caption || '', audio: approved.audio || '', audioLabel: approved.audioLabel || '', consent: approved.consent !== false }],
         pendingMemories: current.pendingMemories.filter((_, i) => i !== index)
       };
     });
@@ -1194,7 +1221,15 @@ function App() {
     addActivity('Memory approved', 'A guest contribution was approved and moved onto the public memorial page.');
   };
 
-  const rejectMemory = (index) => {
+  const rejectMemory = async (index) => {
+    const memory = site.pendingMemories[index];
+    try {
+      await moderateMemory(memory, 'rejected');
+    } catch {
+      setToast('Moderation needs setup');
+      addActivity('Memory moderation needs setup', 'A private-memory decision could not be saved server-side.');
+      return;
+    }
     setSite((current) => {
       const rejected = current.pendingMemories[index];
       if (!rejected) return current;
@@ -1749,10 +1784,10 @@ function App() {
     }
   };
 
-  const submitGuestMemoryLocally = (memory) => {
+  const submitGuestMemoryLocally = (memory, patch = {}) => {
     setSite((current) => ({
       ...current,
-      pendingMemories: [...current.pendingMemories, { ...memory, status: 'Pending', consent: memory.consent === true }]
+      pendingMemories: [...current.pendingMemories, { ...memory, ...patch, status: 'Pending', consent: memory.consent === true }]
     }));
     setToast('Memory sent for family review');
   };
@@ -1775,7 +1810,7 @@ function App() {
         });
         const result = await response.json().catch(() => ({}));
         if (response.ok && result.status === 'saved') {
-          submitGuestMemoryLocally(memory);
+          submitGuestMemoryLocally(memory, { id: result.id || '' });
           addActivity('Memory saved for review', `${memory.from} sent a memory for family moderation.`);
           return result;
         }

@@ -13,6 +13,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `GET /api/drafts`: loads `memorials.draft_payload` by slug when Supabase service credentials are configured.
 - `POST /api/drafts`: upserts protected family draft state into `memorials` through server-side Supabase credentials.
 - `POST /api/memories`: stores guest memories in `memories` with `Pending` moderation status and optionally notifies the family through Resend.
+- `PATCH /api/memories`: approves or rejects a pending guest memory, preserves `approved_at`, `rejected_at`, and `review_note`, and appends a moderation entry to `activity_log`.
 - `POST /api/rsvps`: stores guest RSVP details in `rsvps` and optionally notifies the family through Resend.
 - `POST /api/support-claims`: marks a matching support need as claimed and optionally notifies the family through Resend.
 - `POST /api/publish`: validates the launch packet and upserts publish state into Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
@@ -348,7 +349,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - Publish memorial page.
 - Submit guest memory.
 - Submit guest memory with optional photo, caption, voice note, and audio label.
-- Approve or reject memory.
+- Approve or reject memory with a server-backed moderation update.
 - Upload and delete photos.
 - Add or remove co-admins.
 - Record activity for moderation, exports, helper invites, publishing, checkout, domain setup, and invite preparation.
