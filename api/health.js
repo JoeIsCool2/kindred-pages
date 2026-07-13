@@ -154,6 +154,7 @@ module.exports = async function handler(req, res) {
     memories,
     rsvps,
     supportNeeds,
+    authSessions,
     mediaBucket,
     checkout,
     guestNotifications,
@@ -167,6 +168,7 @@ module.exports = async function handler(req, res) {
     checkSupabaseTable('memories'),
     checkSupabaseTable('rsvps'),
     checkSupabaseTable('support_needs'),
+    checkSupabaseTable('auth_sessions'),
     checkMediaBucket(),
     checkStripe(),
     checkResend(['GUEST_NOTIFICATION_FROM_EMAIL', 'INVITE_FROM_EMAIL']),
@@ -178,6 +180,7 @@ module.exports = async function handler(req, res) {
 
   const inviteDelivery = inviteWebhook.connected ? inviteWebhook : inviteResend;
   const adminAuth = authWebhook.connected ? authWebhook : authResend;
+  const adminAuthConnected = adminAuthConfigured && adminAuth.connected && authSessions.connected;
   const guestActionsConnected = memories.connected && rsvps.connected && supportNeeds.connected;
   const launchReady = Boolean(
     memorials.connected &&
@@ -187,8 +190,7 @@ module.exports = async function handler(req, res) {
     checkout.connected &&
     guestNotifications.connected &&
     inviteDelivery.connected &&
-    adminAuthConfigured &&
-    adminAuth.connected
+    adminAuthConnected
   );
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -198,7 +200,7 @@ module.exports = async function handler(req, res) {
     status: 'ok',
     launchReady,
     integrations: {
-      adminAuth: state(adminAuthConfigured, adminAuthConfigured && adminAuth.connected, true, adminAuthConfigured ? adminAuth.detail : 'Missing auth secret or delivery provider'),
+      adminAuth: state(adminAuthConfigured, adminAuthConnected, true, adminAuthConnected ? 'Auth delivery and session persistence reachable' : adminAuthConfigured ? `${adminAuth.detail}; ${authSessions.detail}` : 'Missing auth secret or delivery provider'),
       auditLogging: state(supabaseConfigured, activityLog.connected, true, activityLog.detail),
       draftPersistence: state(supabaseConfigured, memorials.connected, true, memorials.detail),
       guestActions: state(supabaseConfigured, guestActionsConnected, true, guestActionsConnected ? 'Guest action tables reachable' : 'One or more guest action tables are unreachable'),

@@ -1,3 +1,5 @@
+const crypto = require('node:crypto');
+
 function sendJson(res, status, body) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -38,10 +40,105 @@ function configured() {
   );
 }
 
+function base64Url(input) {
+  return Buffer.from(input).toString('base64url');
+}
+
+function normalizeRole(role) {
+  const normalized = String(role || '').toLowerCase();
+  if (normalized.includes('partner') || normalized.includes('funeral')) return 'partner';
+  if (normalized.includes('owner') || normalized.includes('admin')) return 'owner';
+  if (normalized.includes('helper')) return 'helper';
+  if (normalized.includes('support')) return 'support';
+  return 'helper';
+}
+
+function issueToken(packet) {
+  if (!process.env.AUTH_SECRET) return process.env.AUTH_DEMO_TOKEN || 'demo-admin-session';
+
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    typ: 'kindred-admin-session',
+    email: String(packet.email || '').trim().toLowerCase(),
+    name: packet.name || '',
+    slug: packet.slug || 'memorial',
+    role: normalizeRole(packet.role),
+    iat: now,
+    exp: now + 60 * 60 * 24
+  };
+  const encoded = base64Url(JSON.stringify(payload));
+  const signature = crypto.createHmac('sha256', process.env.AUTH_SECRET).update(encoded).digest('base64url');
+  return `${encoded}.${signature}`;
+}
+
+function verifyToken(token) {
+  if (!process.env.AUTH_SECRET) {
+    const expected = process.env.AUTH_DEMO_TOKEN || 'demo-admin-session';
+    return token === expected
+      ? { ok: true, mode: 'demo-fallback', payload: { slug: 'memorial', role: 'owner', email: '', exp: null } }
+      : { ok: false, error: 'Demo token did not match.' };
+  }
+
+  const [encoded, signature] = String(token || '').split('.');
+  if (!encoded || !signature) return { ok: false, error: 'Auth token is incomplete.' };
+  const expected = crypto.createHmac('sha256', process.env.AUTH_SECRET).update(encoded).digest('base64url');
+  const expectedBuffer = Buffer.from(expected);
+  const signatureBuffer = Buffer.from(signature);
+  if (expectedBuffer.length !== signatureBuffer.length || !crypto.timingSafeEqual(expectedBuffer, signatureBuffer)) {
+    return { ok: false, error: 'Auth token signature did not match.' };
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+  } catch {
+    return { ok: false, error: 'Auth token payload is invalid.' };
+  }
+
+  if (payload.typ !== 'kindred-admin-session') return { ok: false, error: 'Auth token type is invalid.' };
+  if (!payload.exp || payload.exp < Math.floor(Date.now() / 1000)) return { ok: false, error: 'Auth token has expired.' };
+  return { ok: true, mode: 'signed-session', payload };
+}
+
 function signInLink(packet) {
   const base = (packet.returnUrl || process.env.APP_URL || 'https://kindred.page').replace(/\/$/, '');
-  const token = process.env.AUTH_DEMO_TOKEN || 'demo-admin-session';
+  const token = issueToken(packet);
   return `${base}/builder?auth=${encodeURIComponent(token)}&slug=${encodeURIComponent(packet.slug || 'memorial')}`;
+}
+
+async function persistSession(payload, token) {
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  if (!supabaseUrl || !serviceKey || !payload?.slug) return null;
+
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const sessionRow = {
+    slug: payload.slug,
+    email: payload.email || null,
+    name: payload.name || null,
+    role: payload.role || 'helper',
+    token_hash: tokenHash,
+    expires_at: payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
+    verified_at: new Date().toISOString()
+  };
+
+  const response = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/auth_sessions`, {
+    method: 'POST',
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify(sessionRow)
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Auth session persistence failed: ${detail}`);
+  }
+
+  return response.json();
 }
 
 async function postWebhook(packet, link) {
@@ -112,12 +209,34 @@ module.exports = async function handler(req, res) {
   }
 
   if (packet.action === 'verify-token') {
-    const expected = process.env.AUTH_DEMO_TOKEN || 'demo-admin-session';
-    const granted = Boolean(packet.token && packet.token === expected);
-    return sendJson(res, granted ? 200 : 403, {
-      status: granted ? 'session-active' : 'denied',
-      mode: process.env.AUTH_SECRET ? 'configured' : 'demo-fallback'
-    });
+    const verified = verifyToken(packet.token);
+    if (!verified.ok) {
+      return sendJson(res, 403, {
+        status: 'denied',
+        reason: verified.error
+      });
+    }
+
+    try {
+      const saved = verified.mode === 'signed-session' ? await persistSession(verified.payload, packet.token) : null;
+      return sendJson(res, saved ? 200 : 202, {
+        status: 'session-active',
+        mode: verified.mode,
+        slug: verified.payload.slug,
+        email: verified.payload.email,
+        role: verified.payload.role,
+        expiresAt: verified.payload.exp ? new Date(verified.payload.exp * 1000).toISOString() : null,
+        persisted: Boolean(saved),
+        message: saved || verified.mode === 'demo-fallback'
+          ? undefined
+          : 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to persist verified admin sessions.'
+      });
+    } catch (error) {
+      return sendJson(res, 502, {
+        error: 'Auth session persistence failed',
+        detail: error.message
+      });
+    }
   }
 
   if (!packet.email || !packet.slug) {

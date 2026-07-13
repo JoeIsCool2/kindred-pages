@@ -88,6 +88,18 @@ create table memorial_members (
   unique (memorial_id, user_id)
 );
 
+create table auth_sessions (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null,
+  email text,
+  name text,
+  role text not null default 'helper',
+  token_hash text not null,
+  expires_at timestamptz,
+  verified_at timestamptz not null default now(),
+  revoked_at timestamptz
+);
+
 create table memories (
   id uuid primary key default gen_random_uuid(),
   memorial_id uuid not null references memorials(id) on delete cascade,
@@ -299,6 +311,8 @@ create table launch_tasks (
 create index memories_memorial_id_idx on memories(memorial_id);
 create index memorial_members_memorial_id_idx on memorial_members(memorial_id);
 create index memorial_members_user_id_idx on memorial_members(user_id);
+create index auth_sessions_slug_idx on auth_sessions(slug);
+create index auth_sessions_token_hash_idx on auth_sessions(token_hash);
 create index rsvps_memorial_id_idx on rsvps(memorial_id);
 create index photos_memorial_id_idx on photos(memorial_id);
 create index coadmins_memorial_id_idx on coadmins(memorial_id);
@@ -321,6 +335,7 @@ create index launch_tasks_memorial_id_idx on launch_tasks(memorial_id);
 
 alter table memorials enable row level security;
 alter table memorial_members enable row level security;
+alter table auth_sessions enable row level security;
 alter table memories enable row level security;
 alter table rsvps enable row level security;
 alter table photos enable row level security;
@@ -404,6 +419,11 @@ create policy "owners manage memorial membership"
         and owner_membership.role in ('owner', 'admin')
     )
   );
+
+create policy "service role manages auth sessions"
+  on auth_sessions for all
+  using (false)
+  with check (false);
 
 create policy "public approved memories read"
   on memories for select
