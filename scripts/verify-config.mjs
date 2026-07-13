@@ -38,6 +38,7 @@ const optional = [
   ['STRIPE_PAYMENT_LINK_BASE_URL', 'Server-side Stripe payment link fallback'],
   ['SUPABASE_URL', 'Server-side Supabase REST URL for publish endpoint'],
   ['SUPABASE_SERVICE_ROLE_KEY', 'Server-side Supabase service role key for publish endpoint'],
+  ['ACCESS_HASH_SECRET', 'Optional server-side pepper for passcode hashes'],
   ['MEDIA_BUCKET', 'Private object-storage bucket for family photos'],
   ['AUTH_SECRET', 'Server-side auth signing secret'],
   ['AUTH_DEMO_TOKEN', 'Demo auth token for local preview only'],

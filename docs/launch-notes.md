@@ -23,6 +23,7 @@
 - Configure `/api/drafts` with Supabase service credentials for protected draft autosave.
 - Connect database tables for memorials, memories, RSVPs, co-admins, support links, and launch tasks.
 - Configure `/api/access` with Supabase server-side credentials for invite and passcode checks.
+- Set `ACCESS_HASH_SECRET` so production passcode pages use a server-side pepper in addition to salted hashes.
 - Connect photo/object storage.
 - Configure `/api/media` with Supabase storage credentials and a private media bucket.
 - Add transactional email templates.

@@ -25,6 +25,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm gathering-type presets safely adjust service, privacy, schedule, livestream, and guest-care defaults without overwriting the family story.
 - Confirm guest-facing private access screens appear for invite-only and passcode pages before memorial content is shown.
 - Confirm passcodes, invite tokens, guest sharing, and search visibility are enforced through `/api/access` and at publish time.
+- Confirm passcode-protected pages store only `access_code_hash` and never store the raw passcode in publish packets.
 - Confirm guest memories enter moderation before publishing.
 - Confirm guest memories can be approved or kept private, and that kept-private records remain visible to family admins only.
 - Confirm guest memories capture relationship context and review consent before submission.
@@ -89,6 +90,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Set `STRIPE_CHECKOUT_URL` or `STRIPE_PAYMENT_LINK_BASE_URL` for `/api/checkout`.
 - Connect checkout packet fields to the payment provider and fulfillment workflow.
 - Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for `/api/publish`.
+- Set `ACCESS_HASH_SECRET` before enabling passcode-protected pages in production.
 - Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.
 - Confirm invite batches can be queued through `/api/invites` or safely exported when delivery is not configured.
 - Confirm `/api/health` reports admin auth, audit logging, draft persistence, checkout, publish database, access control, media storage, invite delivery, and support email integration state.

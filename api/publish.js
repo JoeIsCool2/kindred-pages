@@ -1,3 +1,5 @@
+const { hashPasscode, sanitizeAccessPayload } = require('./access-hash');
+
 function sendJson(res, status, body) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -33,6 +35,8 @@ function validate(packet) {
   for (const key of ['slug', 'plan', 'privacy', 'contact', 'readiness']) {
     if (packet[key] === undefined || packet[key] === null || packet[key] === '') missing.push(key);
   }
+  if (packet.privacy === 'password' && !packet.accessCode) missing.push('accessCode');
+  if (packet.privacy === 'invite' && !packet.inviteToken) missing.push('inviteToken');
   if (Number(packet.readiness || 0) < 100) missing.push('readiness:100');
   return missing;
 }
@@ -46,11 +50,13 @@ async function saveToSupabase(packet) {
     slug: packet.slug,
     contact_email: packet.contact,
     privacy: packet.privacy,
+    access_code_hash: packet.privacy === 'password' ? hashPasscode(packet.accessCode) : null,
+    invite_token: packet.inviteToken || null,
     custom_domain: packet.customDomain || null,
     plan: packet.plan,
     plan_price: packet.planDetails?.price || null,
     billing_mode: packet.planDetails?.billing || null,
-    checkout_payload: packet,
+    checkout_payload: sanitizeAccessPayload(packet),
     launch_status: 'Published',
     publish_target: packet.shareUrl || packet.productionUrl || null,
     launch_approval: packet.familyApproval || null,

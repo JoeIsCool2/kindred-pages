@@ -2191,6 +2191,8 @@ function App() {
     plan: site.plan,
     planDetails: getPlanDetails(site.plan),
     privacy: site.privacy,
+    accessCode: site.privacy === 'password' ? site.accessCode : '',
+    inviteToken: site.inviteToken,
     customDomain: site.customDomain,
     contact: site.contact,
     privacyReview: site.privacyReview,

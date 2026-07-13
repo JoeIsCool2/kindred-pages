@@ -1,3 +1,5 @@
+const { verifyPasscode } = require('./access-hash');
+
 function sendJson(res, status, body) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -64,11 +66,9 @@ async function storedAccess(packet) {
   if (!record) return false;
   if (record.privacy === 'public' || record.privacy === 'hidden') return true;
   if (record.privacy === 'invite') return normalize(packet.invite || packet.code, 'invite') === normalize(record.invite_token, 'invite');
+  if (record.privacy === 'password') return verifyPasscode(packet.code || packet.accessCode, record.access_code_hash);
 
-  return {
-    status: 'configuration-needed',
-    message: 'Passcode verification needs a password-hash verifier before production password pages are enabled.'
-  };
+  return false;
 }
 
 module.exports = async function handler(req, res) {

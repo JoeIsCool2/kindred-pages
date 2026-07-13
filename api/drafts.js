@@ -1,3 +1,5 @@
+const { hashPasscode } = require('./access-hash');
+
 function sendJson(res, status, body) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -58,6 +60,7 @@ function memorialRow(site) {
     tone: site.tone || 'warm',
     gathering_type: site.gatheringType || null,
     privacy: site.privacy || 'invite',
+    access_code_hash: site.privacy === 'password' ? hashPasscode(site.accessCode) : null,
     invite_token: site.inviteToken || null,
     search_visibility: site.searchVisibility || null,
     allow_guest_sharing: site.allowGuestSharing !== false,
