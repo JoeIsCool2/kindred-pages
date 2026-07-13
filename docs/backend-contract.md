@@ -21,7 +21,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `POST /api/media`: validates photo upload metadata, creates private storage upload targets, and records photo manifest rows when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `MEDIA_BUCKET` are configured.
 - `PATCH /api/media`: updates stored photo captions, cover-photo status, public/private visibility, and sort order after upload.
 - `POST /api/invites`: validates guest invite batches, refuses unknown memorial slugs when Supabase is configured, sends through `INVITE_WEBHOOK_URL` or Resend, and records per-recipient delivery status in `guest_invites`.
-- `GET /api/health`: reports `configured`, `connected`, and `launchBlocking` status for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, archive exports, and support email integrations. Launch readiness requires live probes for the Supabase tables, private media bucket, Stripe plan prices, and Resend delivery API where those providers are required.
+- `GET /api/health`: reports `configured`, `connected`, and `launchBlocking` status for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, archive exports, domain records, and support email integrations. Launch readiness requires live probes for the Supabase tables, private media bucket, Stripe plan prices, and Resend delivery API where those providers are required.
 
 ## Core Tables
 
