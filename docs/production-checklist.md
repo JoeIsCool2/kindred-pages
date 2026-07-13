@@ -97,6 +97,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Set `INVITE_WEBHOOK_URL` or `RESEND_API_KEY` plus `INVITE_FROM_EMAIL` for `/api/invites`.
 - Confirm invite batches can be queued through `/api/invites` or safely exported when delivery is not configured.
 - Confirm `/api/health` reports configured, connected, and launch-blocking state for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, and support email integration state.
+- Treat the site as not launch-ready unless `/api/health` proves Supabase tables are reachable, the private media bucket exists, Stripe plan prices can be read, Resend delivery is reachable, and required webhook URLs are valid HTTPS URLs.
 - Connect checkout return handling, publish endpoint, and domain verification status.
 - Connect Open Graph, canonical URL, share image, and robots metadata publishing.
 - Connect partner account billing, scoped permissions, and family handoff emails.

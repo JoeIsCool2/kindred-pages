@@ -18,7 +18,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `POST /api/access`: validates invite-link and passcode access attempts against stored memorial privacy records when Supabase service credentials are configured. Passcodes are verified against `access_code_hash`; raw passcodes are not stored in the publish packet.
 - `POST /api/media`: validates photo upload metadata and creates private storage upload targets when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `MEDIA_BUCKET` are configured.
 - `POST /api/invites`: validates guest invite batches and sends them through `INVITE_WEBHOOK_URL` or Resend when `RESEND_API_KEY` and `INVITE_FROM_EMAIL` are configured.
-- `GET /api/health`: reports `configured`, `connected`, and `launchBlocking` status for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, and support email integrations.
+- `GET /api/health`: reports `configured`, `connected`, and `launchBlocking` status for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, and support email integrations. Launch readiness requires live probes for the Supabase tables, private media bucket, Stripe plan prices, and Resend delivery API where those providers are required.
 
 ## Core Tables
 
