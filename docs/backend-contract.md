@@ -359,6 +359,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - Enable row-level security for all memorial, guest, partner, archive, support, and activity tables before adding browser-side Supabase access.
 - Seed `memorial_members` and `partner_account_members` when creating owners, helpers, and funeral-home coordinators.
 - Issue signed, expiring admin sign-in links with `AUTH_SECRET`, verify them server-side, and persist hashed session records in `auth_sessions`.
+- Keep demo auth/access disabled in production; `ALLOW_DEMO_AUTH` and `ALLOW_DEMO_ACCESS` must be explicit local-preview switches, not launch fallbacks.
 - Use Stripe Checkout Sessions with `STRIPE_SECRET_KEY`, `STRIPE_FAMILY_PAGE_PRICE_ID`, `STRIPE_LEGACY_ARCHIVE_PRICE_ID`, and `STRIPE_FUNERAL_HOME_PRICE_ID` before marking a payment as launch-ready.
 - Set `STRIPE_WEBHOOK_SECRET` and route Stripe Checkout webhooks to `POST /api/checkout` so completed payment status is persisted even when the buyer does not return to the app.
 - Verify returned Checkout Session status server-side before setting `checkoutStatus` to `Paid`; never use a client-only timer or optimistic UI to mark checkout paid.

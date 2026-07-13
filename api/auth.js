@@ -40,6 +40,10 @@ function configured() {
   );
 }
 
+function demoAuthEnabled() {
+  return process.env.ALLOW_DEMO_AUTH === 'true' && Boolean(process.env.AUTH_DEMO_TOKEN);
+}
+
 function base64Url(input) {
   return Buffer.from(input).toString('base64url');
 }
@@ -54,7 +58,10 @@ function normalizeRole(role) {
 }
 
 function issueToken(packet) {
-  if (!process.env.AUTH_SECRET) return process.env.AUTH_DEMO_TOKEN || 'demo-admin-session';
+  if (!process.env.AUTH_SECRET) {
+    if (demoAuthEnabled()) return process.env.AUTH_DEMO_TOKEN;
+    return '';
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -73,8 +80,8 @@ function issueToken(packet) {
 
 function verifyToken(token) {
   if (!process.env.AUTH_SECRET) {
-    const expected = process.env.AUTH_DEMO_TOKEN || 'demo-admin-session';
-    return token === expected
+    if (!demoAuthEnabled()) return { ok: false, error: 'Production auth is not configured.' };
+    return token === process.env.AUTH_DEMO_TOKEN
       ? { ok: true, mode: 'demo-fallback', payload: { slug: 'memorial', role: 'owner', email: '', exp: null } }
       : { ok: false, error: 'Demo token did not match.' };
   }
@@ -101,6 +108,7 @@ function verifyToken(token) {
 }
 
 function signInLink(packet) {
+  if (!process.env.AUTH_SECRET && !demoAuthEnabled()) return '';
   const base = (packet.returnUrl || process.env.APP_URL || 'https://kindred.page').replace(/\/$/, '');
   const token = issueToken(packet);
   return `${base}/builder?auth=${encodeURIComponent(token)}&slug=${encodeURIComponent(packet.slug || 'memorial')}`;
@@ -255,7 +263,7 @@ module.exports = async function handler(req, res) {
         email: packet.email,
         role: packet.role || 'Family admin',
         slug: packet.slug,
-        signInLink: link
+        ...(link ? { signInLink: link } : {})
       }
     });
   }

@@ -50,6 +50,8 @@ const optional = [
   ['MEDIA_BUCKET', 'Private object-storage bucket for family photos'],
   ['AUTH_SECRET', 'Server-side auth signing secret'],
   ['AUTH_DEMO_TOKEN', 'Demo auth token for local preview only'],
+  ['ALLOW_DEMO_AUTH', 'Explicitly enable demo auth only for local preview'],
+  ['ALLOW_DEMO_ACCESS', 'Explicitly enable demo private-page access only for local preview'],
   ['AUTH_WEBHOOK_URL', 'Server-side auth magic-link webhook'],
   ['AUTH_WEBHOOK_SECRET', 'Optional auth webhook bearer secret'],
   ['AUTH_FROM_EMAIL', 'Verified from-address for auth emails'],

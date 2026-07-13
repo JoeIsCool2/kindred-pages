@@ -78,6 +78,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 
 - Connect authentication for family admins and funeral-home partners.
 - Configure `/api/auth` with `AUTH_SECRET` and either an auth webhook or Resend delivery.
+- Confirm `ALLOW_DEMO_AUTH` and `ALLOW_DEMO_ACCESS` are unset in production.
 - Confirm Admin Access can send signed, expiring sign-in links for owners, helpers, and partner coordinators.
 - Confirm `/api/auth` verifies admin tokens server-side and records hashed session entries in `auth_sessions`.
 - Confirm `/api/audit` appends local activity events to `activity_log` with Supabase service credentials.

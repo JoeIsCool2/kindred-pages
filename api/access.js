@@ -43,6 +43,10 @@ function demoAccess(packet) {
   return normalize(provided, mode) === normalize(expected, mode);
 }
 
+function demoAccessEnabled() {
+  return process.env.ALLOW_DEMO_ACCESS === 'true';
+}
+
 async function storedAccess(packet) {
   const supabaseUrl = process.env.SUPABASE_URL || '';
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -101,7 +105,7 @@ module.exports = async function handler(req, res) {
     if (stored === true) return sendJson(res, 200, { status: 'granted', reason: 'Server access verified' });
     if (stored === false) return sendJson(res, 403, { status: 'denied', reason: 'Access code does not match this memorial' });
 
-    if (demoAccess(packet)) {
+    if (demoAccessEnabled() && demoAccess(packet)) {
       return sendJson(res, 202, {
         status: 'granted',
         mode: 'demo-fallback',
@@ -109,9 +113,16 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    if (!demoAccessEnabled() && stored === null) {
+      return sendJson(res, 202, {
+        status: 'configuration-needed',
+        message: 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to enforce private page access.'
+      });
+    }
+
     return sendJson(res, 403, {
       status: 'denied',
-      mode: 'demo-fallback',
+      ...(demoAccessEnabled() ? { mode: 'demo-fallback' } : {}),
       reason: 'Access code does not match this memorial'
     });
   } catch (error) {
