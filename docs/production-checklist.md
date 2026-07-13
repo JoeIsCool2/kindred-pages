@@ -88,6 +88,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Connect Supabase draft persistence from `docs/storage-integration.md`.
 - Connect private object storage for photos, gallery captions, cover-photo choice, visibility settings, and archive exports.
 - Set `MEDIA_BUCKET` and confirm `/api/media` returns signed private upload targets for family photos.
+- Confirm `/api/media` records photo manifest rows and updates caption, cover-photo choice, visibility, and sort order after upload.
 - Confirm photo cards show whether each image is local-only, storage-ready, or waiting for production storage setup.
 - Connect transactional email for invites, contribution requests, and reminders.
 - Connect reminder scheduling for anniversary and after-service follow-up.

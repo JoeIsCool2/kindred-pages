@@ -2111,10 +2111,14 @@ function App() {
     const packet = {
       slug: site.slug || 'memorial',
       visibility: site.privacy === 'public' ? 'public' : 'private',
-      files: files.map((file) => ({
+      files: files.map((file, index) => ({
         name: file.name,
         type: file.type,
-        size: file.size
+        size: file.size,
+        caption: '',
+        isCover: !site.photos.length && index === 0,
+        isPublic: site.privacy === 'public',
+        sortOrder: (site.photos || []).length + index
       }))
     };
 
@@ -2146,7 +2150,7 @@ function App() {
         photos: current.photos.map((photo) => {
           if (photo.uploadBatch !== packet.slug || photo.storagePath) return photo;
           const upload = uploads.find((item) => item.name === photo.fileName);
-          return upload ? { ...photo, storagePath: upload.storagePath, uploadStatus: 'Storage ready' } : photo;
+          return upload ? { ...photo, storagePath: upload.storagePath, uploadStatus: result.manifest?.status === 'recorded' ? 'Storage ready, manifest saved' : 'Storage ready' } : photo;
         })
       }));
       addActivity('Media storage planned', `${uploads.length} photo upload target${uploads.length === 1 ? '' : 's'} prepared.`);
@@ -2191,11 +2195,45 @@ function App() {
     planMediaStorage(selectedFiles);
   };
 
+  const syncPhotoManifest = async (photo, patch = {}) => {
+    const next = { ...(typeof photo === 'string' ? { src: photo } : photo), ...patch };
+    if (!mediaEndpoint || !next.storagePath) return;
+
+    try {
+      const response = await fetch(mediaEndpoint, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: site.slug || 'memorial',
+          storagePath: next.storagePath,
+          caption: next.caption || '',
+          isCover: Boolean(next.isCover),
+          isPublic: next.isPublic !== false,
+          sortOrder: next.sortOrder || 0
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok && response.status !== 202) throw new Error(result.error || 'Photo manifest update failed');
+      if (result.status === 'manifest-updated') {
+        addActivity('Photo manifest updated', 'Caption, cover, or visibility metadata was saved to storage records.');
+      }
+    } catch {
+      addActivity('Photo manifest needs review', 'A photo metadata change stayed local because storage metadata could not be updated.');
+    }
+  };
+
+  const updatePhoto = (index, patch) => {
+    const photo = site.photos[index];
+    updateList('photos', index, patch);
+    syncPhotoManifest(photo, patch);
+  };
+
   const setCoverPhoto = (index) => {
     setSite((current) => ({
       ...current,
       photos: current.photos.map((photo, i) => ({ ...(typeof photo === 'string' ? { src: photo } : photo), isCover: i === index }))
     }));
+    site.photos.forEach((photo, i) => syncPhotoManifest(photo, { isCover: i === index }));
     setToast('Cover photo selected');
   };
 
@@ -2837,7 +2875,7 @@ function App() {
         </aside>
 
         <section className="editor">
-        <Editor active={active} site={site} progress={progress} shareUrl={shareUrl} productionUrl={productionUrl} shareMetadata={shareMetadata} copyShareMetadata={copyShareMetadata} checkoutPacketText={checkoutPacketText} copyCheckoutPacket={copyCheckoutPacket} copyFamilyApprovalPacket={copyFamilyApprovalPacket} copyLaunchReadinessReport={copyLaunchReadinessReport} downloadLaunchReadinessReport={downloadLaunchReadinessReport} copyFamilyHandoffPacket={copyFamilyHandoffPacket} copyClosurePacket={copyClosurePacket} integrationChecks={integrationChecks} applyGatheringPreset={applyGatheringPreset} update={update} updateMessage={updateMessage} updateLivestreamPlan={updateLivestreamPlan} updateList={updateList} removeList={removeList} addMemory={addMemory} addMilestone={addMilestone} addScheduleItem={addScheduleItem} addCareContact={addCareContact} addDayOfTask={addDayOfTask} addGuestFaq={addGuestFaq} addCustomCare={addCustomCare} addSupportGift={addSupportGift} addSupportNeed={addSupportNeed} addAftercareReminder={addAftercareReminder} addAnniversaryCare={addAnniversaryCare} updateAnniversaryStatus={updateAnniversaryStatus} addThankYouRecipient={addThankYouRecipient} addCoadmin={addCoadmin} coadminInviteText={coadminInviteText} copyCoadminInvite={copyCoadminInvite} requestAdminAccess={requestAdminAccess} addServiceOrderItem={addServiceOrderItem} addProgramPerson={addProgramPerson} addServiceSelection={addServiceSelection} addGuestUpdate={addGuestUpdate} addObituaryPlacement={addObituaryPlacement} updateObituaryPlacementStatus={updateObituaryPlacementStatus} addClosureRequest={addClosureRequest} updatePartner={updatePartner} addPartnerDraft={addPartnerDraft} markHandoffReady={markHandoffReady} toggleAftercare={toggleAftercare} toggleThankYouSent={toggleThankYouSent} toggleDayOfTask={toggleDayOfTask} toggleGuestFollowUp={toggleGuestFollowUp} toggleGuestInvite={toggleGuestInvite} updateClosureRequestStatus={updateClosureRequestStatus} handlePhotos={handlePhotos} setCoverPhoto={setCoverPhoto} setSite={setSite} qrDataUrl={qrDataUrl} approveMemory={approveMemory} rejectMemory={rejectMemory} addRsvp={addRsvp} importGuestList={importGuestList} toggleTask={toggleTask} toggleAccessibilityCheck={toggleAccessibilityCheck} toggleApprovalCheck={toggleApprovalCheck} updateLaunchApproval={updateLaunchApproval} markLaunchApproved={markLaunchApproved} togglePrivacyReviewCheck={togglePrivacyReviewCheck} updatePrivacyReview={updatePrivacyReview} markPrivacyReviewed={markPrivacyReviewed} toggleSensitiveReviewCheck={toggleSensitiveReviewCheck} updateSensitiveReview={updateSensitiveReview} markSensitiveReviewed={markSensitiveReviewed} downloadCsv={downloadCsv} downloadCalendar={downloadCalendar} downloadProgram={downloadProgram} downloadMemoryBook={downloadMemoryBook} downloadQrCards={downloadQrCards} downloadGuestGuide={downloadGuestGuide} downloadDayOfPacket={downloadDayOfPacket} copyAftercarePacket={copyAftercarePacket} aftercarePacketText={aftercarePacketText} dayOfPacketText={dayOfPacketText} downloadJson={downloadJson} startCheckout={startCheckout} connectDomain={connectDomain} publishPage={publishPage} sendInvites={sendInvites} copyText={copyText} guestGuideText={guestGuideText} importArchive={importArchive} resetSample={resetSample} />
+        <Editor active={active} site={site} progress={progress} shareUrl={shareUrl} productionUrl={productionUrl} shareMetadata={shareMetadata} copyShareMetadata={copyShareMetadata} checkoutPacketText={checkoutPacketText} copyCheckoutPacket={copyCheckoutPacket} copyFamilyApprovalPacket={copyFamilyApprovalPacket} copyLaunchReadinessReport={copyLaunchReadinessReport} downloadLaunchReadinessReport={downloadLaunchReadinessReport} copyFamilyHandoffPacket={copyFamilyHandoffPacket} copyClosurePacket={copyClosurePacket} integrationChecks={integrationChecks} applyGatheringPreset={applyGatheringPreset} update={update} updateMessage={updateMessage} updateLivestreamPlan={updateLivestreamPlan} updateList={updateList} removeList={removeList} addMemory={addMemory} addMilestone={addMilestone} addScheduleItem={addScheduleItem} addCareContact={addCareContact} addDayOfTask={addDayOfTask} addGuestFaq={addGuestFaq} addCustomCare={addCustomCare} addSupportGift={addSupportGift} addSupportNeed={addSupportNeed} addAftercareReminder={addAftercareReminder} addAnniversaryCare={addAnniversaryCare} updateAnniversaryStatus={updateAnniversaryStatus} addThankYouRecipient={addThankYouRecipient} addCoadmin={addCoadmin} coadminInviteText={coadminInviteText} copyCoadminInvite={copyCoadminInvite} requestAdminAccess={requestAdminAccess} addServiceOrderItem={addServiceOrderItem} addProgramPerson={addProgramPerson} addServiceSelection={addServiceSelection} addGuestUpdate={addGuestUpdate} addObituaryPlacement={addObituaryPlacement} updateObituaryPlacementStatus={updateObituaryPlacementStatus} addClosureRequest={addClosureRequest} updatePartner={updatePartner} addPartnerDraft={addPartnerDraft} markHandoffReady={markHandoffReady} toggleAftercare={toggleAftercare} toggleThankYouSent={toggleThankYouSent} toggleDayOfTask={toggleDayOfTask} toggleGuestFollowUp={toggleGuestFollowUp} toggleGuestInvite={toggleGuestInvite} updateClosureRequestStatus={updateClosureRequestStatus} handlePhotos={handlePhotos} updatePhoto={updatePhoto} setCoverPhoto={setCoverPhoto} setSite={setSite} qrDataUrl={qrDataUrl} approveMemory={approveMemory} rejectMemory={rejectMemory} addRsvp={addRsvp} importGuestList={importGuestList} toggleTask={toggleTask} toggleAccessibilityCheck={toggleAccessibilityCheck} toggleApprovalCheck={toggleApprovalCheck} updateLaunchApproval={updateLaunchApproval} markLaunchApproved={markLaunchApproved} togglePrivacyReviewCheck={togglePrivacyReviewCheck} updatePrivacyReview={updatePrivacyReview} markPrivacyReviewed={markPrivacyReviewed} toggleSensitiveReviewCheck={toggleSensitiveReviewCheck} updateSensitiveReview={updateSensitiveReview} markSensitiveReviewed={markSensitiveReviewed} downloadCsv={downloadCsv} downloadCalendar={downloadCalendar} downloadProgram={downloadProgram} downloadMemoryBook={downloadMemoryBook} downloadQrCards={downloadQrCards} downloadGuestGuide={downloadGuestGuide} downloadDayOfPacket={downloadDayOfPacket} copyAftercarePacket={copyAftercarePacket} aftercarePacketText={aftercarePacketText} dayOfPacketText={dayOfPacketText} downloadJson={downloadJson} startCheckout={startCheckout} connectDomain={connectDomain} publishPage={publishPage} sendInvites={sendInvites} copyText={copyText} guestGuideText={guestGuideText} importArchive={importArchive} resetSample={resetSample} />
         </section>
 
         <aside className="preview-wrap">
@@ -3521,7 +3559,7 @@ function BuilderStartGuide({ site, progress }) {
   );
 }
 
-function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata, copyShareMetadata, checkoutPacketText, copyCheckoutPacket, copyFamilyApprovalPacket, copyLaunchReadinessReport, downloadLaunchReadinessReport, copyFamilyHandoffPacket, copyClosurePacket, integrationChecks, applyGatheringPreset, update, updateMessage, updateLivestreamPlan, updateList, removeList, addMemory, addMilestone, addScheduleItem, addCareContact, addDayOfTask, addGuestFaq, addCustomCare, addSupportGift, addSupportNeed, addAftercareReminder, addAnniversaryCare, updateAnniversaryStatus, addThankYouRecipient, addCoadmin, copyCoadminInvite, requestAdminAccess, addServiceOrderItem, addProgramPerson, addServiceSelection, addGuestUpdate, addObituaryPlacement, updateObituaryPlacementStatus, addClosureRequest, updatePartner, addPartnerDraft, markHandoffReady, toggleAftercare, toggleThankYouSent, toggleDayOfTask, toggleGuestFollowUp, toggleGuestInvite, updateClosureRequestStatus, handlePhotos, setCoverPhoto, setSite, qrDataUrl, approveMemory, rejectMemory, addRsvp, importGuestList, toggleTask, toggleAccessibilityCheck, toggleApprovalCheck, updateLaunchApproval, markLaunchApproved, togglePrivacyReviewCheck, updatePrivacyReview, markPrivacyReviewed, toggleSensitiveReviewCheck, updateSensitiveReview, markSensitiveReviewed, downloadCsv, downloadCalendar, downloadProgram, downloadMemoryBook, downloadQrCards, downloadGuestGuide, downloadDayOfPacket, copyAftercarePacket, aftercarePacketText, dayOfPacketText, downloadJson, startCheckout, connectDomain, publishPage, sendInvites, copyText, guestGuideText, importArchive, resetSample }) {
+function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata, copyShareMetadata, checkoutPacketText, copyCheckoutPacket, copyFamilyApprovalPacket, copyLaunchReadinessReport, downloadLaunchReadinessReport, copyFamilyHandoffPacket, copyClosurePacket, integrationChecks, applyGatheringPreset, update, updateMessage, updateLivestreamPlan, updateList, removeList, addMemory, addMilestone, addScheduleItem, addCareContact, addDayOfTask, addGuestFaq, addCustomCare, addSupportGift, addSupportNeed, addAftercareReminder, addAnniversaryCare, updateAnniversaryStatus, addThankYouRecipient, addCoadmin, copyCoadminInvite, requestAdminAccess, addServiceOrderItem, addProgramPerson, addServiceSelection, addGuestUpdate, addObituaryPlacement, updateObituaryPlacementStatus, addClosureRequest, updatePartner, addPartnerDraft, markHandoffReady, toggleAftercare, toggleThankYouSent, toggleDayOfTask, toggleGuestFollowUp, toggleGuestInvite, updateClosureRequestStatus, handlePhotos, updatePhoto, setCoverPhoto, setSite, qrDataUrl, approveMemory, rejectMemory, addRsvp, importGuestList, toggleTask, toggleAccessibilityCheck, toggleApprovalCheck, updateLaunchApproval, markLaunchApproved, togglePrivacyReviewCheck, updatePrivacyReview, markPrivacyReviewed, toggleSensitiveReviewCheck, updateSensitiveReview, markSensitiveReviewed, downloadCsv, downloadCalendar, downloadProgram, downloadMemoryBook, downloadQrCards, downloadGuestGuide, downloadDayOfPacket, copyAftercarePacket, aftercarePacketText, dayOfPacketText, downloadJson, startCheckout, connectDomain, publishPage, sendInvites, copyText, guestGuideText, importArchive, resetSample }) {
   const [guestImportText, setGuestImportText] = useState('');
 
   const privateInviteUrl = `${shareUrl}?invite=${site.inviteToken || 'family'}`;
@@ -3636,7 +3674,7 @@ function Editor({ active, site, progress, shareUrl, productionUrl, shareMetadata
             </button>
           ))}
         </div>
-        <PhotoUploader photos={site.photos} onFiles={handlePhotos} onRemove={(i) => removeList('photos', i)} onUpdate={(i, patch) => updateList('photos', i, patch)} onCover={setCoverPhoto} />
+        <PhotoUploader photos={site.photos} onFiles={handlePhotos} onRemove={(i) => removeList('photos', i)} onUpdate={updatePhoto} onCover={setCoverPhoto} />
       </Panel>
     );
   }
