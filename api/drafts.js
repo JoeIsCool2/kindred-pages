@@ -1,4 +1,4 @@
-const { hashPasscode } = require('./access-hash');
+const { hashPasscode } = require('../src/server/access-hash');
 
 function sendJson(res, status, body) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
