@@ -26,6 +26,7 @@ const required = [
   ['VITE_MEDIA_ENDPOINT', 'Media upload planning endpoint for photo storage'],
   ['VITE_ACCESS_ENDPOINT', 'Access-check endpoint for invite and passcode pages'],
   ['VITE_AUTH_ENDPOINT', 'Admin authentication endpoint for family and partner sessions'],
+  ['VITE_AUDIT_ENDPOINT', 'Append-only audit log endpoint for family and partner actions'],
   ['VITE_SUPPORT_EMAIL', 'Reachable support email']
 ];
 

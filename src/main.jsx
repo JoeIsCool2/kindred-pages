@@ -1059,13 +1059,31 @@ function App() {
     window.setTimeout(() => document.querySelector('#builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
   };
   const addActivity = (action, detail) => {
+    const entry = {
+      action,
+      detail,
+      when: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    };
     setSite((current) => ({
       ...current,
       activityLog: [
-        { action, detail, when: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) },
+        entry,
         ...(current.activityLog || [])
       ].slice(0, 12)
     }));
+    if (auditEndpoint) {
+      fetch(auditEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: site.slug || 'memorial',
+          actor: site.coadmins?.[0]?.name || site.contact || 'Family admin',
+          action,
+          detail,
+          occurredAt: new Date().toISOString()
+        })
+      }).catch(() => undefined);
+    }
   };
   const applyGatheringPreset = (preset) => {
     setSite((current) => ({
@@ -1086,8 +1104,10 @@ function App() {
   const mediaEndpoint = import.meta.env.VITE_MEDIA_ENDPOINT || '/api/media';
   const accessEndpoint = import.meta.env.VITE_ACCESS_ENDPOINT || '/api/access';
   const authEndpoint = import.meta.env.VITE_AUTH_ENDPOINT || '/api/auth';
+  const auditEndpoint = import.meta.env.VITE_AUDIT_ENDPOINT || '/api/audit';
   const integrationChecks = useMemo(() => ([
     { label: 'Admin auth', detail: authEndpoint ? 'Auth endpoint set' : 'Needs auth endpoint', ready: Boolean(authEndpoint), icon: UserCheck },
+    { label: 'Audit log', detail: auditEndpoint ? 'Audit endpoint set' : 'Needs audit endpoint', ready: Boolean(auditEndpoint), icon: Clock },
     { label: 'Cloud drafts', detail: import.meta.env.VITE_SUPABASE_URL ? 'Supabase URL set' : 'Needs Supabase URL', ready: Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY), icon: Archive },
     { label: 'Media storage', detail: mediaEndpoint ? 'Media endpoint set' : 'Needs media endpoint', ready: Boolean(mediaEndpoint), icon: Image },
     { label: 'Access checks', detail: accessEndpoint ? 'Access endpoint set' : 'Needs access endpoint', ready: Boolean(accessEndpoint), icon: Lock },
@@ -1097,7 +1117,7 @@ function App() {
     { label: 'Support email', detail: import.meta.env.VITE_SUPPORT_EMAIL || 'Needs support email', ready: Boolean(import.meta.env.VITE_SUPPORT_EMAIL), icon: Mail },
     { label: 'Analytics', detail: import.meta.env.VITE_POSTHOG_KEY ? 'Analytics key set' : 'Optional analytics key', ready: Boolean(import.meta.env.VITE_POSTHOG_KEY), icon: Eye },
     { label: 'Domain', detail: productionUrl, ready: Boolean(productionUrl && productionUrl.startsWith('https://')), icon: Globe2 }
-  ]), [accessEndpoint, authEndpoint, checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
+  ]), [accessEndpoint, auditEndpoint, authEndpoint, checkoutUrl, inviteEndpoint, mediaEndpoint, publishEndpoint, productionUrl]);
 
   useEffect(() => {
     const metadata = getRouteMetadata(route, site, productionUrl);

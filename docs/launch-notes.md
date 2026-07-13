@@ -19,6 +19,7 @@
 
 - Connect authentication.
 - Configure `/api/auth` with admin sign-in delivery credentials.
+- Configure `/api/audit` with Supabase service credentials for append-only activity logs.
 - Connect database tables for memorials, memories, RSVPs, co-admins, support links, and launch tasks.
 - Configure `/api/access` with Supabase server-side credentials for invite and passcode checks.
 - Connect photo/object storage.
