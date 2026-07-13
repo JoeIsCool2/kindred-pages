@@ -11,7 +11,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `POST /api/auth`: prepares or sends family-admin and partner sign-in links through `AUTH_WEBHOOK_URL` or Resend when auth credentials are configured.
 - `POST /api/audit`: appends family-admin and partner activity events to `activity_log` when Supabase service credentials are configured.
 - `GET /api/drafts`: loads `memorials.draft_payload` by slug when Supabase service credentials are configured.
-- `POST /api/drafts`: upserts protected family draft state into `memorials` through server-side Supabase credentials.
+- `POST /api/drafts`: upserts protected family draft state into `memorials` through server-side Supabase credentials; with `action=archive-export`, records a durable archive export row and activity log entry.
 - `POST /api/memories`: stores guest memories in `memories` with `Pending` moderation status and optionally notifies the family through Resend.
 - `PATCH /api/memories`: approves or rejects a pending guest memory, preserves `approved_at`, `rejected_at`, and `review_note`, and appends a moderation entry to `activity_log`.
 - `POST /api/rsvps`: stores guest RSVP details in `rsvps` and optionally notifies the family through Resend.
@@ -21,7 +21,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `POST /api/media`: validates photo upload metadata, creates private storage upload targets, and records photo manifest rows when `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `MEDIA_BUCKET` are configured.
 - `PATCH /api/media`: updates stored photo captions, cover-photo status, public/private visibility, and sort order after upload.
 - `POST /api/invites`: validates guest invite batches, refuses unknown memorial slugs when Supabase is configured, sends through `INVITE_WEBHOOK_URL` or Resend, and records per-recipient delivery status in `guest_invites`.
-- `GET /api/health`: reports `configured`, `connected`, and `launchBlocking` status for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, and support email integrations. Launch readiness requires live probes for the Supabase tables, private media bucket, Stripe plan prices, and Resend delivery API where those providers are required.
+- `GET /api/health`: reports `configured`, `connected`, and `launchBlocking` status for admin auth, audit logging, draft persistence, guest actions, checkout, publish database, access control, media storage, invite delivery, archive exports, and support email integrations. Launch readiness requires live probes for the Supabase tables, private media bucket, Stripe plan prices, and Resend delivery API where those providers are required.
 
 ## Core Tables
 
@@ -348,6 +348,17 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - `done`
 - `sort_order`
 
+### archive_exports
+
+- `id`
+- `memorial_id`
+- `exported_by`
+- `export_status`
+- `manifest`
+- `archive_payload`
+- `exported_at`
+- `created_at`
+
 ## Required API Operations
 
 - Hash passcodes with a salted verifier before storing `access_code_hash`; set `ACCESS_HASH_SECRET` as a server-only pepper for production.
@@ -382,6 +393,7 @@ Server functions use `SUPABASE_SERVICE_ROLE_KEY` for controlled writes. Browser 
 - Update service program order and participant records.
 - Export memorial archive.
 - Export archive manifest with counts, retention plan, closure status, and included records.
+- Persist archive export records in `archive_exports` with the manifest, archive payload, exported-by value, and exported timestamp.
 - Export guest list CSV.
 - Export guest guide.
 - Export or copy aftercare packet with thank-you wording, archive status, reminders, and helpful contacts.

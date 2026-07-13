@@ -325,6 +325,17 @@ create table launch_tasks (
   sort_order integer not null default 0
 );
 
+create table archive_exports (
+  id uuid primary key default gen_random_uuid(),
+  memorial_id uuid not null references memorials(id) on delete cascade,
+  exported_by text,
+  export_status text not null default 'Recorded',
+  manifest jsonb not null,
+  archive_payload jsonb,
+  exported_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+
 create index memories_memorial_id_idx on memories(memorial_id);
 create index memorial_members_memorial_id_idx on memorial_members(memorial_id);
 create index memorial_members_user_id_idx on memorial_members(user_id);
@@ -351,6 +362,7 @@ create index thank_you_recipients_memorial_id_idx on thank_you_recipients(memori
 create index obituary_placements_memorial_id_idx on obituary_placements(memorial_id);
 create index activity_log_memorial_id_idx on activity_log(memorial_id);
 create index launch_tasks_memorial_id_idx on launch_tasks(memorial_id);
+create index archive_exports_memorial_id_idx on archive_exports(memorial_id);
 
 alter table memorials enable row level security;
 alter table memorial_members enable row level security;
@@ -375,6 +387,7 @@ alter table program_people enable row level security;
 alter table service_selections enable row level security;
 alter table activity_log enable row level security;
 alter table launch_tasks enable row level security;
+alter table archive_exports enable row level security;
 
 create or replace function current_user_can_manage_memorial(target_memorial_id uuid)
 returns boolean
@@ -557,3 +570,6 @@ create policy "members read activity log"
   on activity_log for select using (current_user_can_manage_memorial(memorial_id));
 create policy "members manage launch tasks"
   on launch_tasks for all using (current_user_can_manage_memorial(memorial_id)) with check (current_user_can_manage_memorial(memorial_id));
+
+create policy "members manage archive exports"
+  on archive_exports for all using (current_user_can_manage_memorial(memorial_id)) with check (current_user_can_manage_memorial(memorial_id));

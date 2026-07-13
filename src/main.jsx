@@ -2237,7 +2237,7 @@ function App() {
     setToast('Cover photo selected');
   };
 
-  const downloadJson = () => {
+  const downloadJson = async () => {
     const archiveExportedAt = new Date().toISOString();
     const archivedSite = {
       ...site,
@@ -2321,6 +2321,33 @@ function App() {
       manifest,
       site: archivedSite
     };
+    if (draftEndpoint) {
+      try {
+        const response = await fetch(draftEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'archive-export',
+            exportedAt: archiveExportedAt,
+            exportedBy: site.coadmins?.[0]?.name || site.contact || 'Family admin',
+            manifest,
+            site: archivedSite
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result.status === 'archive-recorded') {
+          payload.manifest.archiveRecord = {
+            id: result.archiveExportId,
+            exportedAt: result.exportedAt
+          };
+          addActivity('Archive export recorded', 'The family archive export was recorded server-side.');
+        } else if (result.status === 'configuration-needed') {
+          addActivity('Archive export needs setup', 'The archive downloaded locally while server archive records need Supabase setup.');
+        }
+      } catch {
+        addActivity('Archive export stayed local', 'The archive downloaded locally because the server export record could not be saved.');
+      }
+    }
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

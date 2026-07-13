@@ -142,6 +142,48 @@ async function saveDraft(site) {
   return row;
 }
 
+async function insertArchiveExport(memorial, packet) {
+  const exportedAt = packet.exportedAt || new Date().toISOString();
+  const response = await fetch(`${baseUrl()}/rest/v1/archive_exports`, {
+    method: 'POST',
+    headers: supabaseHeaders('return=representation'),
+    body: JSON.stringify({
+      memorial_id: memorial.id,
+      exported_by: packet.exportedBy || packet.site?.contact || null,
+      export_status: 'Recorded',
+      manifest: packet.manifest || {},
+      archive_payload: packet,
+      exported_at: exportedAt
+    })
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Archive export insert failed: ${detail}`);
+  }
+
+  const [row] = await response.json();
+  return row;
+}
+
+async function recordActivity(memorial, actor, detail) {
+  const response = await fetch(`${baseUrl()}/rest/v1/activity_log`, {
+    method: 'POST',
+    headers: supabaseHeaders('return=minimal'),
+    body: JSON.stringify({
+      memorial_id: memorial.id,
+      actor: actor || 'Family admin',
+      action: 'Archive exported',
+      detail: detail || 'A family archive export was recorded.'
+    })
+  });
+
+  if (!response.ok) {
+    const detailText = await response.text();
+    throw new Error(`Archive activity insert failed: ${detailText}`);
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     res.setHeader('Allow', 'GET, POST');
@@ -167,6 +209,21 @@ module.exports = async function handler(req, res) {
     }
 
     const packet = await readBody(req);
+    if (packet.action === 'archive-export') {
+      const site = packet.site || {};
+      if (!site.slug) return sendJson(res, 422, { error: 'Archive export packet needs a site slug' });
+
+      const memorial = await saveDraft({ ...site, archiveStatus: 'Exported' });
+      const archive = await insertArchiveExport(memorial, packet);
+      await recordActivity(memorial, packet.exportedBy || site.contact, `Archive export recorded with ${packet.manifest?.included?.length || 0} included categories.`).catch(() => undefined);
+      return sendJson(res, 200, {
+        status: 'archive-recorded',
+        slug: site.slug,
+        archiveExportId: archive.id,
+        exportedAt: archive.exported_at
+      });
+    }
+
     const site = packet.site || packet;
     if (!site.slug) return sendJson(res, 422, { error: 'Draft packet needs a slug' });
 

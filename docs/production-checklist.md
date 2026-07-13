@@ -120,6 +120,7 @@ Use this before putting Kindred Pages in front of paying families or funeral-hom
 - Confirm no page is indexed unless the family chooses a public mode.
 - Confirm invite-only, password, and hidden pages publish `noindex,nofollow`, while public pages may publish `index,follow`.
 - Confirm archive export is available before page closure.
+- Confirm archive exports are recorded in `archive_exports` through `/api/drafts` with manifest, payload, exporter, and timestamp.
 - Confirm closure and data requests can be logged, statused, copied, and included in archive records.
 - Confirm archive manifest includes counts, retention plan, closure status, kept-private moderation records, and all included record categories.
 - Confirm archive manifest includes aftercare packet wording and reminder status.
